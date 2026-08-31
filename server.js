@@ -325,7 +325,6 @@ function sendOrderFile(req, res) {
   if (order.userId !== user.id) return res.status(403).send("Bạn không có quyền tải đơn này.");
   if (!order.paid) return res.status(403).send("Thanh toán chưa được xác nhận.");
 
-  if (order.product === "adr-aimlock") return res.redirect("https://www.mediafire.com/file/hfg7ibdd8ujtddn/AIMLOCK+VIP+ADR.zip/file");
   const file = order.product === "blind-bag" ? order.blindFile : fileFor(order);
   if (!file) return res.status(404).send("Sản phẩm chưa được gắn file hoặc chưa random.");
 

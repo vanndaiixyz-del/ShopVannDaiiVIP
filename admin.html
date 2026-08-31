@@ -54,25 +54,25 @@ button:disabled{opacity:.5}
   </section>
 </main>
 <script>
-let adminPassword = sessionStorage.getItem("admin_password") || "";
+let adminAuthenticated = false;
 let knownOrderIds = new Set();
 let pollingTimer = null;
 let audioCtx = null;
 let notificationPermissionAsked = false;
 let notificationEnabled = false;
 let newOrderCount = 0;
-if(adminPassword) showDashboard();
+checkAdminSession();
 
 async function login(){
-  adminPassword=document.getElementById("password").value;
-  const r=await fetch("/admin/api/orders",{credentials:"same-origin",headers:{"x-admin-password":adminPassword}});
-  if(!r.ok){
-    document.getElementById("loginStatus").textContent="Mật khẩu không đúng.";
-    adminPassword="";
-    return;
-  }
-  sessionStorage.setItem("admin_password",adminPassword);
-  showDashboard();
+  const password=document.getElementById("password").value;
+  const r=await fetch("/admin/api/login",{credentials:"same-origin",method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({password})});
+  document.getElementById("password").value="";
+  if(!r.ok){const x=await r.json().catch(()=>({}));document.getElementById("loginStatus").textContent=x.error||"Mật khẩu không đúng.";return;}
+  adminAuthenticated=true;showDashboard();
+}
+async function checkAdminSession(){
+  const r=await fetch("/admin/api/me",{credentials:"same-origin",cache:"no-store"});
+  if(r.ok){const x=await r.json();if(x.authenticated){adminAuthenticated=true;showDashboard();}}
 }
 
 function showDashboard(){
@@ -165,7 +165,7 @@ async function loadTestProducts(){
 }
 async function createTestOrder(){
   const product=document.getElementById("testProduct").value;
-  const r=await fetch("/admin/api/test-order",{credentials:"same-origin",method:"POST",headers:{"x-admin-password":adminPassword,"Content-Type":"application/json"},body:JSON.stringify({product})});
+  const r=await fetch("/admin/api/test-order",{credentials:"same-origin",method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({product})});
   const x=await r.json();
   document.getElementById("testStatus").textContent=r.ok?`Đơn FREE: ${x.orderId} — 0đ — ${x.status}`:(x.error||"Không tạo được đơn test");
   if(r.ok) loadOrders(false);
@@ -174,8 +174,8 @@ async function createTestOrder(){
 function money(n){return new Intl.NumberFormat("vi-VN").format(n)+"đ"}
 
 async function loadOrders(initial=false,manual=false){
-  const r=await fetch("/admin/api/orders?_="+Date.now(),{credentials:"same-origin",cache:"no-store",headers:{"x-admin-password":adminPassword}});
-  if(r.status===401){sessionStorage.removeItem("admin_password");location.reload();return}
+  const r=await fetch("/admin/api/orders?_="+Date.now(),{credentials:"same-origin",cache:"no-store",});
+  if(r.status===401){location.reload();return}
   const orders=await r.json();
   if(initial){
     knownOrderIds=new Set(orders.map(o=>o.orderId));
@@ -212,7 +212,7 @@ async function confirmOrder(orderId,btn){
   if(!confirm("Bạn đã kiểm tra app ngân hàng và xác nhận đơn này đã nhận đúng số tiền?")) return;
   btn.disabled=true;
   const r=await fetch("/admin/api/orders/"+encodeURIComponent(orderId)+"/confirm",{
-    method:"POST",headers:{"x-admin-password":adminPassword}
+    method:"POST",
   });
   if(!r.ok){alert("Không xác nhận được đơn.");btn.disabled=false;return}
   loadOrders(false);

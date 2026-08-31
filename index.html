@@ -91,14 +91,14 @@ const categories=[
   ["adr-aimlock","AIMLOCK",350000,false,"","• Cân rank<br>• Cân phòng<br>• kéo nhẹ là đỏ<br>• Ko kéo là vàng"]
  ]},
  {title:"AIM FLIZA",badge:"ỔN ĐỊNH - GỌN GÀNG",badgeClass:"blue",theme:"blue",products:[
-  ["aim-lock","AIMLOCK VIP",250000,true,"","• Cân Phòng<br>• Ko nên đi Rank<br>• Kéo Nhẹ Là Đỏ",[["normal","Free Fire thường"],["max","Free Fire MAX"]]],
+  ["aim-lock","AIMLOCK VIP",250000,true,"","• Cân Phòng<br>• Ko nên đi Rank<br>• Kéo Nhẹ Là Đỏ",[["ffth","FFTH"],["ffm","FFM"]]],
   ["fliza-aimlock-supper","AIMLOCK SUPPER",250000,false,"FFTH","• Kéo là Đỏ<br>• Cân phòng<br>• Ko nên đi rank"],
   ["aim-drag","AIM DRAG",350000,false,"","• Cân Phòng<br>• Cân Rank<br>• Kéo Là đỏ"],
   ["aim-body","AIM BODY",100000,false,"","• Cân phòng<br>• Ko nên đi Rank<br>• Bắn Đâu Cũng Đỏ"],
   ["aim-neck","AIM NECK",350000,false,"","• Cân Phòng<br>• Cân Rank<br>• Kéo nhẹ Là đỏ"]
  ]}
 ];
-const box=document.getElementById("products");let currentOrderId=null;
+const box=document.getElementById("products");let currentOrderId=sessionStorage.getItem("vdvip_current_order")||null;
 function iconFor(id){if(id.includes("neck"))return "◉";if(id.includes("body"))return "◎";if(id.includes("drag"))return "◎";if(id.includes("lock"))return "◈";if(id.includes("r8"))return "🛡️";return "✓"}
 function render(){categories.forEach(cat=>{const section=document.createElement("section");section.className="category";section.innerHTML=`<div class="cat-head"><h3>${cat.title}</h3><span class="badge ${cat.badgeClass}">${cat.badge}</span></div>`;const grid=document.createElement("div");grid.className="product-grid";cat.products.forEach(([id,name,price,choice,tag,desc,options])=>{const d=document.createElement("article");d.className="card";const iconClass=cat.theme;const opts=options||[];const selectHtml=choice?`<select id="ed-${id}"><option value="">Chọn phiên bản</option>${opts.map(([v,l])=>`<option value="${v}">${l}</option>`).join("")}</select>`:"";d.innerHTML=`<div class="card-top"><div class="icon ${iconClass}">${iconFor(id)}</div><div><h4>${name}</h4><div class="desc">${desc}</div></div></div><div class="price ${cat.theme==='green'?'green-price':cat.theme==='blue'?'blue-price':'purple-price'}">${money(price)}</div>${tag?`<span class="tag">Loại: ${tag}</span>`:""}${selectHtml}<div class="actions"><button type="button" onclick="details('${id}')">ⓘ Chi tiết</button><button type="button" class="buy ${cat.theme==='blue'?'blue':''}" onclick="createOrder('${id}',${choice})">🛒 Mua ngay</button></div>`;grid.appendChild(d)});section.appendChild(grid);box.appendChild(section)})}
 function details(id){
@@ -115,6 +115,25 @@ function details(id){
   alert(text);
 }
 render();
+async function refreshProductAvailability(){
+  try{
+    const r=await fetch("/api/products",{credentials:"same-origin",cache:"no-store"});
+    if(!r.ok)return;
+    const data=await r.json();
+    document.querySelectorAll(".card .buy").forEach(btn=>{
+      const card=btn.closest(".card");
+      if(!card)return;
+      const title=card.querySelector("h4")?.textContent?.trim();
+      const entry=Object.entries(data).find(([,p])=>p.name===title && p.fileAvailable===false);
+      if(entry){btn.disabled=true;btn.textContent="File chưa có";btn.title="File sản phẩm chưa được đưa vào ZIP";btn.style.opacity=".55";btn.style.cursor="not-allowed";}
+    });
+  }catch{}
+}
+refreshProductAvailability();
+if(currentOrderId){
+  const pay=document.getElementById("pay");
+  if(pay){pay.style.display="block";document.getElementById("orderCode").textContent=currentOrderId;checkOrder();}
+}
 async function createOrder(product,needsChoice){
   try {
     const me = await fetch("/api/auth/me",{credentials:"same-origin",cache:"no-store"});
@@ -127,8 +146,8 @@ async function createOrder(product,needsChoice){
   } catch(e) {
     alert("Không kiểm tra được trạng thái đăng nhập.");
     return;
-  }let edition=null;if(needsChoice){edition=document.getElementById("ed-"+product).value;if(!edition){alert("Vui lòng chọn phiên bản");return}}const pay=document.getElementById("pay"),status=document.getElementById("status"),dl=document.getElementById("download");pay.style.display="block";dl.style.display="none";status.innerHTML="<p>Đang tạo mã đơn hàng…</p>";try{const r=await fetch("/api/orders",{credentials:"same-origin",method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({product,edition})});const x=await r.json();if(!r.ok){status.innerHTML='<p class="bad">'+(x.error||"Không tạo được đơn")+"</p>";return}currentOrderId=x.orderId;document.getElementById("orderCode").textContent=x.orderId;document.getElementById("orderAmount").textContent=money(x.amount);document.getElementById("info").textContent="Chuyển đúng số tiền và ghi mã đơn hàng trong nội dung chuyển khoản.";status.innerHTML='<p class="ok">✓ Đã tạo đơn. Sau khi chuyển khoản, chờ Admin xác nhận.</p>';if(product==='blind-bag'){document.getElementById("blindResult").style.display="block";document.getElementById("blindResult").innerHTML="🔒 Chưa random — chờ thanh toán thành công."}pay.scrollIntoView({behavior:"smooth",block:"center"})}catch(e){status.innerHTML='<p class="bad">Không kết nối được máy chủ.</p>'}}
-async function checkOrder(){if(!currentOrderId)return;const status=document.getElementById("status"),dl=document.getElementById("download");try{const r=await fetch("/api/orders/"+encodeURIComponent(currentOrderId),{credentials:"same-origin"});const x=await r.json();if(x.paid){if(x.product==="adr-aimlock"){dl.href="https://www.mediafire.com/file/hfg7ibdd8ujtddn/AIMLOCK+VIP+ADR.zip/file";dl.textContent="Tải AIMLOCK VIP ADR";dl.target="_blank";dl.rel="noopener";dl.style.display="inline-block";status.innerHTML='<p class="ok">✓ Thanh toán thành công — bạn có thể mở link tải AIMLOCK VIP ADR.</p>';return}if(x.product==="TÚI MÙ"){const rr=await fetch("/api/orders/"+encodeURIComponent(currentOrderId)+"/randomize",{credentials:"same-origin",method:"POST"});const rx=await rr.json();if(rr.ok&&rx.file){document.getElementById("blindResult").style.display="block";document.getElementById("blindResult").innerHTML='🎉 <strong>Đã random 100%:</strong> '+rx.file;dl.href="/api/orders/"+encodeURIComponent(currentOrderId)+"/download";dl.style.display="inline-block";status.innerHTML='<p class="ok">✓ Thanh toán thành công — đã random file theo nhân phẩm.</p>';}else status.innerHTML='<p class="bad">Không random được file.</p>'}else{status.innerHTML='<p class="ok">✓ Thanh toán đã được xác nhận. Bạn có thể tải sản phẩm.</p>';dl.href="/api/orders/"+encodeURIComponent(currentOrderId)+"/download";dl.style.display="inline-block"}}else status.innerHTML='<p class="bad">Chưa được xác nhận thanh toán. Vui lòng chờ Admin kiểm tra.</p>'}catch(e){status.innerHTML='<p class="bad">Không kiểm tra được trạng thái đơn.</p>'}}
+  }let edition=null;if(needsChoice){edition=document.getElementById("ed-"+product).value;if(!edition){alert("Vui lòng chọn phiên bản");return}}const pay=document.getElementById("pay"),status=document.getElementById("status"),dl=document.getElementById("download");pay.style.display="block";dl.style.display="none";status.innerHTML="<p>Đang tạo mã đơn hàng…</p>";try{const r=await fetch("/api/orders",{credentials:"same-origin",method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({product,edition})});const x=await r.json();if(!r.ok){status.innerHTML='<p class="bad">'+(x.error||"Không tạo được đơn")+"</p>";return}currentOrderId=x.orderId;sessionStorage.setItem("vdvip_current_order",currentOrderId);document.getElementById("orderCode").textContent=x.orderId;document.getElementById("orderAmount").textContent=money(x.amount);document.getElementById("info").textContent="Chuyển đúng số tiền và ghi mã đơn hàng trong nội dung chuyển khoản.";status.innerHTML='<p class="ok">✓ Đã tạo đơn. Sau khi chuyển khoản, chờ Admin xác nhận.</p>';if(product==='blind-bag'){document.getElementById("blindResult").style.display="block";document.getElementById("blindResult").innerHTML="🔒 Chưa random — chờ thanh toán thành công."}pay.scrollIntoView({behavior:"smooth",block:"center"})}catch(e){status.innerHTML='<p class="bad">Không kết nối được máy chủ.</p>'}}
+async function checkOrder(){if(!currentOrderId)return;const status=document.getElementById("status"),dl=document.getElementById("download");try{const r=await fetch("/api/orders/"+encodeURIComponent(currentOrderId),{credentials:"same-origin"});const x=await r.json();if(r.status===404){sessionStorage.removeItem("vdvip_current_order");currentOrderId=null;status.innerHTML='<p class="bad">Đơn không còn tồn tại.</p>';return}if(x.paid){if(x.product==="adr-aimlock"){dl.href="https://www.mediafire.com/file/hfg7ibdd8ujtddn/AIMLOCK+VIP+ADR.zip/file";dl.textContent="Tải AIMLOCK VIP ADR";dl.target="_blank";dl.rel="noopener";dl.style.display="inline-block";status.innerHTML='<p class="ok">✓ Thanh toán thành công — bạn có thể mở link tải AIMLOCK VIP ADR.</p>';return}if(x.product==="TÚI MÙ"){const rr=await fetch("/api/orders/"+encodeURIComponent(currentOrderId)+"/randomize",{credentials:"same-origin",method:"POST"});const rx=await rr.json();if(rr.ok&&rx.file){document.getElementById("blindResult").style.display="block";document.getElementById("blindResult").innerHTML='🎉 <strong>Đã random 100%:</strong> '+rx.file;dl.href="/api/orders/"+encodeURIComponent(currentOrderId)+"/download";dl.style.display="inline-block";status.innerHTML='<p class="ok">✓ Thanh toán thành công — đã random file theo nhân phẩm.</p>';}else status.innerHTML='<p class="bad">Không random được file.</p>'}else{status.innerHTML='<p class="ok">✓ Thanh toán đã được xác nhận. Bạn có thể tải sản phẩm.</p>';dl.href="/api/orders/"+encodeURIComponent(currentOrderId)+"/download";dl.style.display="inline-block"}}else status.innerHTML='<p class="bad">Chưa được xác nhận thanh toán. Vui lòng chờ Admin kiểm tra.</p>'}catch(e){status.innerHTML='<p class="bad">Không kiểm tra được trạng thái đơn.</p>'}}
 setInterval(()=>{if(currentOrderId)checkOrder()},10000);
 </script>
 </body></html>

@@ -1,11 +1,16 @@
-# ShopVannĐaiiVIP — giao diện sắp xếp dọc
+# ShopVannĐaiiVIP V9
 
-Bản này giữ luồng shop hiện tại và chỉnh giao diện để các mục đi theo thứ tự từ trên xuống dưới:
-1. AIM 3105
-2. AIM FLIZA
-3. Thanh toán QR sau khi tạo đơn
-4. Admin mua FREE (0đ)
+Bản này giữ giao diện shop và luồng thanh toán hiện tại, đồng thời sửa backend AUTH / ORDER / FILE.
 
-Trên điện thoại, từng danh mục là một khối riêng; các sản phẩm nằm gọn trong khối của chính danh mục đó, tránh tình trạng hai danh mục bị trộn vào nhau.
+- AIM 3105
+- AIM FLIZA
+- AIM-ADR
+- TÚI MÙ
+- Thanh toán QR
+- Admin xác nhận đơn
+- Cấp file sau khi duyệt
+- Tải lại từ lịch sử mua
+- Admin Test FREE
+- Đăng ký / đăng nhập bằng cookie HttpOnly
 
-Mật khẩu Admin được kiểm tra bằng verifier server-side cố định; không lưu plaintext trong frontend.
+**Quan trọng:** deploy bằng Render **Web Service Node/Express**, không phải Static Site.

@@ -1,20 +1,25 @@
-# Fix cấp file
+# ShopVannĐaiiVIP V9 — Fix toàn bộ luồng AUTH / ORDER / FILE
 
-Bản này sửa lỗi `File không tồn tại` bằng cách:
-- Tìm file sản phẩm theo tên trong `private_files`, `storage`, `files` và các thư mục lồng nhau.
-- Chỉ đơn đã `PAID`/`PAID_TEST` mới tải được.
-- Có đường dẫn tải `/api/orders/:id/download`.
-- Có `/api/orders/:id/file-status` để kiểm tra server có thấy file tương ứng.
-- Có nút `Kiểm tra thanh toán` trên shop.
+## Đã sửa
+- Root cause Render Static không chạy backend: Blueprint chuyển sang Node Web Service.
+- Đăng ký và đăng nhập người dùng.
+- Cookie phiên HttpOnly + SameSite.
+- Admin login server-side, không đưa plaintext password vào frontend.
+- Chống thử mật khẩu Admin liên tục ở endpoint login.
+- Tạo đơn bắt buộc đăng nhập.
+- Admin xác nhận thanh toán.
+- Chỉ đơn đã duyệt mới cấp file.
+- Lịch sử mua và tải lại.
+- Random TÚI MÙ sau khi thanh toán.
+- Admin Test FREE.
+- Health/version endpoint.
+- Mapping file AIM 3105 theo đúng thư mục riêng, tránh lấy nhầm file trùng tên.
+- Kiểm tra file thật trước khi báo có thể tải.
+- Giữ nguyên ảnh QR thanh toán.
 
+## File AIM còn thiếu trong ZIP
+ZIP nguồn này không chứa file binary cho:
+- AIMLOCK VIP (AIM FLIZA)
+- AIMLOCK VIP (AIM 3105)
 
-## TÚI MÙ
-- Giá: 50.000đ.
-- Chỉ random sau khi đơn đã được Admin xác nhận thanh toán.
-- Kết quả random được lưu vào đơn để không đổi khi tải lại.
-
-## AIM files in this package
-- AIM FLIZA: AIMLOCK SUPPER, AIM DRAG, AIM BODY, AIM NECK are mapped to the actual ZIP files included in `private_files`/`public/downloads`.
-- AIM 3105: AIM NECK, AIM BODY, AIM DRAG, AIM HEAD, DRAG VIP V1, AIM DRAG NEW, AIM NECK NEW and AIM MAGIC are mapped to the actual ZIP files included.
-- The source ZIP does **not** contain the binary files for AIMLOCK VIP (FLIZA) or AIMLOCK VIP (3105), so the server does not pretend those files exist. Those products remain listed but their download is blocked until the real source files are supplied.
-- Product preview SVGs are also copied to the root `assets/products/` directory so they load when the site is served as a Render Static Site.
+Hai sản phẩm vẫn được giữ trong danh mục để không làm mất cấu hình shop, nhưng server không giả tạo file. Muốn cấp đúng hai sản phẩm này cần bổ sung đúng file nguồn của chúng vào ZIP.

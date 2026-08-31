@@ -35,6 +35,7 @@ button:disabled{opacity:.5}
     <h2>Admin Test — Mua FREE</h2>
     <p class="small">Admin có thể tạo đơn 0đ để kiểm tra luồng.</p>
     <select id="testProduct" style="width:100%;padding:12px;border-radius:10px;background:#0d0f14;color:#fff;border:1px solid #343b4c"></select>
+    <select id="testEdition" style="display:none;width:100%;padding:12px;border-radius:10px;background:#0d0f14;color:#fff;border:1px solid #343b4c;margin-top:8px"></select>
     <button onclick="createTestOrder()">Mua FREE (0đ)</button>
     <p id="testStatus" class="small"></p>
   </section>
@@ -179,17 +180,32 @@ async function loadTestProducts(){
     const r=await fetch("/api/products",{credentials:"same-origin",cache:"no-store"});
     const data=await r.json();
     if(!r.ok) throw new Error(data.error||"Không tải được danh sách AIM.");
-    document.getElementById("testProduct").innerHTML=Object.entries(data).map(([id,p])=>{
+    const select=document.getElementById("testProduct");
+    select.innerHTML=Object.entries(data).map(([id,p])=>{
       const suffix=p.fileAvailable===false?" — FILE CHƯA CÓ":"";
       return `<option value="${id}">${p.name} — ${money(p.price)}${suffix}</option>`;
     }).join("");
+    const edition=document.getElementById("testEdition");
+    function syncEdition(){
+      const p=data[select.value];
+      if(select.value==="aim-lock"){
+        edition.style.display="block";
+        edition.innerHTML='<option value="ffth">FFTH</option><option value="ffm">FFM</option>';
+      }else{
+        edition.style.display="none";
+        edition.innerHTML='<option value="">Không có phiên bản</option>';
+      }
+    }
+    select.onchange=syncEdition;
+    syncEdition();
   } catch(e) {
     document.getElementById("testStatus").textContent="Không tải được danh sách AIM. Hãy kiểm tra backend Render.";
   }
 }
 async function createTestOrder(){
   const product=document.getElementById("testProduct").value;
-  const r=await fetch("/admin/api/test-order",{credentials:"same-origin",method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({product})});
+  const edition=document.getElementById("testEdition").value || null;
+  const r=await fetch("/admin/api/test-order",{credentials:"same-origin",method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({product,edition})});
   const x=await r.json();
   document.getElementById("testStatus").textContent=r.ok?`Đơn FREE: ${x.orderId} — 0đ — ${x.status}`:(x.error||"Không tạo được đơn test");
   if(r.ok) loadOrders(false);
@@ -226,7 +242,7 @@ async function loadOrders(initial=false,manual=false){
       <div class="row"><span>Số tiền</span><strong>${money(o.amount||0)}</strong></div>
       <div class="small">Tạo: ${o.purchaseDate&&o.purchaseTime ? `${o.purchaseDate} ${o.purchaseTime}` : (o.createdAt||"-")}</div>
       ${paid
-        ? `<div class="small">Đã xác nhận: ${o.confirmedDate&&o.confirmedTime ? `${o.confirmedDate} ${o.confirmedTime}` : (o.paidAt||"-")}</div>`
+        ? `<div class="small">Đã xác nhận: ${o.confirmedDate&&o.confirmedTime ? `${o.confirmedDate} ${o.confirmedTime}` : (o.paidAt||"-")}</div>${o.status==='PAID_TEST'?`<a href="/admin/api/orders/${encodeURIComponent(o.orderId)}/download" style="display:inline-block;margin-top:10px;padding:10px 14px;background:#25c45a;color:#fff;border-radius:10px;text-decoration:none;font-weight:800">Tải file test</a>`:''}`
         : `<button style="margin-top:12px" onclick="confirmOrder('${o.orderId}',this)">Xác nhận đã thanh toán</button>`}
     </div>`;
   }).join("");

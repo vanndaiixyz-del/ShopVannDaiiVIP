@@ -1,9 +1,7 @@
-# ShopVannĐaiiVIP AUTH FIX V3
+# ShopVannĐaiiVIP AUTH / ORDER FIX V9
 
-- Admin password uses a fixed server-side verifier; plaintext is not shipped to frontend.
-- Registration auto-logs the user in.
-- Login/register errors return explicit JSON instead of generic errors.
-- Session cookies work on Render HTTPS and local HTTP.
-- `/api/version` returns build `SHOPVANNDAIIVIP-AUTH-ORDERS-AIM-V7`.
+Bản này phải chạy bằng Node/Express Web Service. Không deploy dưới Render Static Site.
 
-After deploying, open `/api/version`; it must show `SHOPVANNDAIIVIP-AUTH-ORDERS-AIM-V7`. If it does not, Render is still serving an older deployment.
+Build: `SHOPVANNDAIIVIP-AUTH-ORDERS-AIM-V9`
+
+Admin authentication dùng verifier scrypt phía server; frontend chỉ gửi mật khẩu qua HTTPS tới endpoint login và không chứa plaintext password.

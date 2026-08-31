@@ -4,13 +4,14 @@ const path = require("path");
 const crypto = require("crypto");
 
 const app = express();
+app.set("trust proxy", 1);
 const PORT = Number(process.env.PORT) || 3000;
 const HOST = process.env.HOST || "0.0.0.0";
 const DATA = path.join(__dirname, "orders.json");
 const PUBLIC_DIR = path.join(__dirname, "public");
 const ROOT_INDEX = path.join(__dirname, "index.html");
 const ROOT_ADMIN = path.join(__dirname, "admin.html");
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "VDVIP";
+const ADMIN_PASSWORD = "VDVIP";
 
 const USERS_DATA = path.join(__dirname, "users.json");
 const SESSIONS_DATA = path.join(__dirname, "sessions.json");
@@ -38,10 +39,12 @@ function currentUser(req) {
   return users.find(u=>u.id===session.userId) || null;
 }
 function setSessionCookie(res, sid) {
-  res.setHeader("Set-Cookie", `${SESSION_COOKIE}=${encodeURIComponent(sid)}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=2592000`);
+  const secure = Boolean(req.secure || req.headers["x-forwarded-proto"] === "https") ? "; Secure" : "";
+  res.setHeader("Set-Cookie", `${SESSION_COOKIE}=${encodeURIComponent(sid)}; Path=/; HttpOnly${secure}; SameSite=Lax; Max-Age=2592000`);
 }
 function clearSessionCookie(res) {
-  res.setHeader("Set-Cookie", `${SESSION_COOKIE}=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0`);
+  const secure = Boolean(req.secure || req.headers["x-forwarded-proto"] === "https") ? "; Secure" : "";
+  res.setHeader("Set-Cookie", `${SESSION_COOKIE}=; Path=/; HttpOnly${secure}; SameSite=Lax; Max-Age=0`);
 }
 function hashPassword(password, salt=crypto.randomBytes(16).toString("hex")) {
   const hash=crypto.scryptSync(String(password), salt, 64).toString("hex");
@@ -325,6 +328,7 @@ function sendOrderFile(req, res) {
   if (order.userId !== user.id) return res.status(403).send("Bạn không có quyền tải đơn này.");
   if (!order.paid) return res.status(403).send("Thanh toán chưa được xác nhận.");
 
+  if (order.product === "adr-aimlock") return res.redirect("https://www.mediafire.com/file/hfg7ibdd8ujtddn/AIMLOCK+VIP+ADR.zip/file");
   const file = order.product === "blind-bag" ? order.blindFile : fileFor(order);
   if (!file) return res.status(404).send("Sản phẩm chưa được gắn file hoặc chưa random.");
 

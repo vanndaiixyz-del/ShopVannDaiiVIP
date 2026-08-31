@@ -65,7 +65,7 @@ if(adminPassword) showDashboard();
 
 async function login(){
   adminPassword=document.getElementById("password").value;
-  const r=await fetch("/admin/api/orders",{headers:{"x-admin-password":adminPassword}});
+  const r=await fetch("/admin/api/orders",{credentials:"same-origin",headers:{"x-admin-password":adminPassword}});
   if(!r.ok){
     document.getElementById("loginStatus").textContent="Mật khẩu không đúng.";
     adminPassword="";
@@ -165,7 +165,7 @@ async function loadTestProducts(){
 }
 async function createTestOrder(){
   const product=document.getElementById("testProduct").value;
-  const r=await fetch("/admin/api/test-order",{method:"POST",headers:{"x-admin-password":adminPassword,"Content-Type":"application/json"},body:JSON.stringify({product})});
+  const r=await fetch("/admin/api/test-order",{credentials:"same-origin",method:"POST",headers:{"x-admin-password":adminPassword,"Content-Type":"application/json"},body:JSON.stringify({product})});
   const x=await r.json();
   document.getElementById("testStatus").textContent=r.ok?`Đơn FREE: ${x.orderId} — 0đ — ${x.status}`:(x.error||"Không tạo được đơn test");
   if(r.ok) loadOrders(false);
@@ -174,7 +174,7 @@ async function createTestOrder(){
 function money(n){return new Intl.NumberFormat("vi-VN").format(n)+"đ"}
 
 async function loadOrders(initial=false,manual=false){
-  const r=await fetch("/admin/api/orders?_="+Date.now(),{cache:"no-store",headers:{"x-admin-password":adminPassword}});
+  const r=await fetch("/admin/api/orders?_="+Date.now(),{credentials:"same-origin",cache:"no-store",headers:{"x-admin-password":adminPassword}});
   if(r.status===401){sessionStorage.removeItem("admin_password");location.reload();return}
   const orders=await r.json();
   if(initial){

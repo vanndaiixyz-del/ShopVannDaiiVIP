@@ -12,17 +12,28 @@ const PUBLIC_DIR = path.join(__dirname, "public");
 const ROOT_INDEX = path.join(__dirname, "index.html");
 const ROOT_ADMIN = path.join(__dirname, "admin.html");
 const ADMIN_PASSWORD = "VDVIP";
+const BUILD_ID = "AUTH-FIX-VDVIP-V3";
 
 const USERS_DATA = path.join(__dirname, "users.json");
 const SESSIONS_DATA = path.join(__dirname, "sessions.json");
 const SESSION_COOKIE = "vdvip_session";
 
 function loadJsonArray(file) {
-  if (!fs.existsSync(file)) fs.writeFileSync(file, "[]", "utf8");
-  try { const v = JSON.parse(fs.readFileSync(file, "utf8")); return Array.isArray(v) ? v : []; }
-  catch { return []; }
+  try {
+    if (!fs.existsSync(file)) fs.writeFileSync(file, "[]", "utf8");
+    const v = JSON.parse(fs.readFileSync(file, "utf8"));
+    return Array.isArray(v) ? v : [];
+  } catch (err) {
+    console.error("JSON read failed:", file, err.message);
+    try { fs.writeFileSync(file, "[]", "utf8"); } catch (e) { console.error("JSON reset failed:", file, e.message); }
+    return [];
+  }
 }
-function saveJsonArray(file, value) { fs.writeFileSync(file, JSON.stringify(value, null, 2), "utf8"); }
+function saveJsonArray(file, value) {
+  const tmp = file + ".tmp";
+  fs.writeFileSync(tmp, JSON.stringify(value, null, 2), "utf8");
+  fs.renameSync(tmp, file);
+}
 function parseCookies(req) {
   const raw=req.headers.cookie||"";
   const out={};
@@ -51,8 +62,15 @@ function hashPassword(password, salt=crypto.randomBytes(16).toString("hex")) {
   return {salt, hash};
 }
 function verifyPassword(password, salt, expected) {
-  const actual=crypto.scryptSync(String(password), salt, 64).toString("hex");
-  return crypto.timingSafeEqual(Buffer.from(actual,"hex"), Buffer.from(expected,"hex"));
+  try {
+    if (!salt || !expected || typeof expected !== "string" || expected.length !== 128) return false;
+    const actual=crypto.scryptSync(String(password), String(salt), 64).toString("hex");
+    const a=Buffer.from(actual,"hex"), b=Buffer.from(expected,"hex");
+    return a.length === b.length && crypto.timingSafeEqual(a,b);
+  } catch (err) {
+    console.error("Password verification failed:", err.message);
+    return false;
+  }
 }
 function formatVN(iso) {
   if(!iso) return {date:"-", time:"-"};
@@ -143,7 +161,8 @@ function findProductFile(filename) {
 app.set("trust proxy", 1);
 app.use(express.json({ limit: "100kb" }));
 
-app.get("/health", (req, res) => res.json({ ok: true, service: "ShopVannĐaiiVIP" }));
+app.get("/health", (req, res) => res.json({ ok: true, service: "ShopVannĐaiiVIP", build: BUILD_ID }));
+app.get("/api/version", (req, res) => res.json({ ok: true, build: BUILD_ID, adminPasswordMode: "fixed" }));
 app.get("/", (req, res) => {
   const index = path.join(PUBLIC_DIR, "index.html");
   if (fs.existsSync(index)) return res.sendFile(index);
@@ -166,28 +185,43 @@ app.get(["/account", "/account/", "/account.html"], (req,res)=>{
 });
 
 app.post("/api/auth/register", (req,res)=>{
-  const email=String(req.body?.email||"").trim().toLowerCase();
-  const password=String(req.body?.password||"");
-  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return res.status(400).json({error:"Email không hợp lệ."});
-  if(password.length<6) return res.status(400).json({error:"Mật khẩu tối thiểu 6 ký tự."});
-  const users=loadJsonArray(USERS_DATA);
-  if(users.some(u=>u.email===email)) return res.status(409).json({error:"Email đã được đăng ký."});
-  const {salt,hash}=hashPassword(password);
-  const user={id:"U"+Date.now().toString(36).toUpperCase()+crypto.randomBytes(3).toString("hex"),email,passwordHash:hash,passwordSalt:salt,createdAt:new Date().toISOString()};
-  users.push(user); saveJsonArray(USERS_DATA,users);
-  res.status(201).json({ok:true,message:"Đăng ký thành công. Hãy đăng nhập."});
+  try {
+    const email=String(req.body?.email||"").trim().toLowerCase();
+    const password=String(req.body?.password||"");
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return res.status(400).json({error:"Email không hợp lệ."});
+    if(password.length<6) return res.status(400).json({error:"Mật khẩu tối thiểu 6 ký tự."});
+    const users=loadJsonArray(USERS_DATA);
+    if(users.some(u=>u.email===email)) return res.status(409).json({error:"Email đã được đăng ký. Hãy đăng nhập."});
+    const {salt,hash}=hashPassword(password);
+    const user={id:"U"+Date.now().toString(36).toUpperCase()+crypto.randomBytes(3).toString("hex"),email,passwordHash:hash,passwordSalt:salt,createdAt:new Date().toISOString()};
+    users.push(user); saveJsonArray(USERS_DATA,users);
+    const sid=crypto.randomBytes(32).toString("hex");
+    const sessions=loadJsonArray(SESSIONS_DATA).filter(x=>!x.expiresAt || Date.parse(x.expiresAt)>Date.now());
+    sessions.push({id:sid,userId:user.id,createdAt:new Date().toISOString(),expiresAt:new Date(Date.now()+2592000000).toISOString()});
+    saveJsonArray(SESSIONS_DATA,sessions); setSessionCookie(req,res,sid);
+    res.status(201).json({ok:true,message:"Đăng ký thành công.",email:user.email});
+  } catch (err) {
+    console.error("REGISTER_ERROR", err);
+    res.status(500).json({error:"Máy chủ không thể lưu tài khoản. Hãy thử lại."});
+  }
 });
 
 app.post("/api/auth/login",(req,res)=>{
-  const email=String(req.body?.email||"").trim().toLowerCase();
-  const password=String(req.body?.password||"");
-  const user=loadJsonArray(USERS_DATA).find(u=>u.email===email);
-  if(!user || !verifyPassword(password,user.passwordSalt,user.passwordHash)) return res.status(401).json({error:"Email hoặc mật khẩu không đúng."});
-  const sid=crypto.randomBytes(32).toString("hex");
-  const sessions=loadJsonArray(SESSIONS_DATA).filter(x=>!x.expiresAt || Date.parse(x.expiresAt)>Date.now());
-  sessions.push({id:sid,userId:user.id,createdAt:new Date().toISOString(),expiresAt:new Date(Date.now()+2592000000).toISOString()});
-  saveJsonArray(SESSIONS_DATA,sessions); setSessionCookie(req,res,sid);
-  res.json({ok:true,email:user.email});
+  try {
+    const email=String(req.body?.email||"").trim().toLowerCase();
+    const password=String(req.body?.password||"");
+    if(!email || !password) return res.status(400).json({error:"Vui lòng nhập email và mật khẩu."});
+    const user=loadJsonArray(USERS_DATA).find(u=>u.email===email);
+    if(!user || !verifyPassword(password,user.passwordSalt,user.passwordHash)) return res.status(401).json({error:"Email hoặc mật khẩu không đúng."});
+    const sid=crypto.randomBytes(32).toString("hex");
+    const sessions=loadJsonArray(SESSIONS_DATA).filter(x=>!x.expiresAt || Date.parse(x.expiresAt)>Date.now());
+    sessions.push({id:sid,userId:user.id,createdAt:new Date().toISOString(),expiresAt:new Date(Date.now()+2592000000).toISOString()});
+    saveJsonArray(SESSIONS_DATA,sessions); setSessionCookie(req,res,sid);
+    res.json({ok:true,email:user.email});
+  } catch (err) {
+    console.error("LOGIN_ERROR", err);
+    res.status(500).json({error:"Máy chủ đăng nhập đang gặp lỗi. Hãy thử lại."});
+  }
 });
 app.post("/api/auth/logout",(req,res)=>{ const sid=parseCookies(req)[SESSION_COOKIE]; const sessions=loadJsonArray(SESSIONS_DATA).filter(x=>x.id!==sid); saveJsonArray(SESSIONS_DATA,sessions); clearSessionCookie(req,res); res.json({ok:true}); });
 app.get("/api/auth/me",(req,res)=>{const u=currentUser(req); res.json({authenticated:Boolean(u),user:u?{id:u.id,email:u.email}:null});});
@@ -365,6 +399,12 @@ app.get("/api/orders/:id/file-status", (req, res) => {
   const file = fileFor(order);
   const full = file ? findProductFile(file) : null;
   res.json({ orderId: order.id, paid: Boolean(order.paid), file, exists: Boolean(full) });
+});
+
+app.use((err, req, res, next) => {
+  console.error("EXPRESS_ERROR", err);
+  if (res.headersSent) return next(err);
+  res.status(500).json({ error: "Máy chủ gặp lỗi nội bộ.", build: BUILD_ID });
 });
 
 const server = app.listen(PORT, HOST, () => {

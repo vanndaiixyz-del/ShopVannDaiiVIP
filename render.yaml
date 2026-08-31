@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: shopvann-daii-vip
+    name: ShopVannDaiiVIP
     runtime: node
     buildCommand: npm install
     startCommand: npm start

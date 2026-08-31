@@ -22,7 +22,7 @@ button:disabled{opacity:.5}
 </style>
 </head>
 <body>
-<header><h1>ShopVannĐaiiVIP Admin <span id="newOrderBadge" style="display:none;background:#ff3b30;color:#fff;border-radius:999px;padding:4px 9px;font-size:14px;vertical-align:middle">0 đơn mới</span></h1></header>
+<header><div style="display:flex;justify-content:space-between;align-items:center;gap:12px"><h1 style="margin:0">ShopVannĐaiiVIP Admin <span id="newOrderBadge" style="display:none;background:#ff3b30;color:#fff;border-radius:999px;padding:4px 9px;font-size:14px;vertical-align:middle">0 đơn mới</span></h1><button id="logoutBtn" onclick="logout()" style="display:none;width:auto;padding:9px 14px">Đăng xuất</button></div></header>
 <main>
   <div id="orderNotice" style="display:none;position:fixed;right:12px;top:12px;left:auto;width:min(420px,calc(100vw - 24px));z-index:99999;background:#10251a;border:1px solid #2bd576;color:#8ef0ad;border-radius:14px;padding:14px 16px;margin-bottom:14px;box-shadow:0 8px 30px rgba(0,0,0,.25)">🔔 <strong id="noticeText">Có đơn hàng mới</strong><button onclick="dismissNotice()" style="width:auto;float:right;padding:6px 10px;margin:-5px -4px 0 10px">Đóng</button></div>
   <section class="panel" id="login">
@@ -63,22 +63,39 @@ let notificationEnabled = false;
 let newOrderCount = 0;
 checkAdminSession();
 
+async function checkAdminSession(){
+  try {
+    const r=await fetch("/admin/api/me",{credentials:"same-origin",cache:"no-store"});
+    const x=await r.json();
+    if(r.ok && x.authenticated){ adminAuthenticated=true; showDashboard(); }
+  } catch {}
+}
+
 async function login(){
   const password=document.getElementById("password").value;
-  const r=await fetch("/admin/api/login",{credentials:"same-origin",method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({password})});
-  document.getElementById("password").value="";
-  if(!r.ok){const x=await r.json().catch(()=>({}));document.getElementById("loginStatus").textContent=x.error||"Mật khẩu không đúng.";return;}
-  adminAuthenticated=true;showDashboard();
+  const status=document.getElementById("loginStatus");
+  status.textContent="Đang xác thực…";
+  try {
+    const r=await fetch("/admin/api/login",{credentials:"same-origin",method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({password})});
+    const x=await r.json().catch(()=>({}));
+    if(!r.ok){ status.textContent=x.error||"Đăng nhập Admin thất bại."; return; }
+    adminAuthenticated=true;
+    document.getElementById("password").value="";
+    status.textContent="";
+    showDashboard();
+  } catch { status.textContent="Không kết nối được máy chủ."; }
 }
-async function checkAdminSession(){
-  const r=await fetch("/admin/api/me",{credentials:"same-origin",cache:"no-store"});
-  if(r.ok){const x=await r.json();if(x.authenticated){adminAuthenticated=true;showDashboard();}}
+
+async function logout(){
+  try { await fetch("/admin/api/logout",{credentials:"same-origin",method:"POST"}); } catch {}
+  location.reload();
 }
 
 function showDashboard(){
   document.getElementById("login").style.display="none";
   document.getElementById("dashboard").style.display="block";
   document.getElementById("testPanel").style.display="block";
+  document.getElementById("logoutBtn").style.display="block";
   loadTestProducts();
   loadOrders(true);
   startOrderPolling();
@@ -174,7 +191,7 @@ async function createTestOrder(){
 function money(n){return new Intl.NumberFormat("vi-VN").format(n)+"đ"}
 
 async function loadOrders(initial=false,manual=false){
-  const r=await fetch("/admin/api/orders?_="+Date.now(),{credentials:"same-origin",cache:"no-store",});
+  const r=await fetch("/admin/api/orders?_="+Date.now(),{credentials:"same-origin",cache:"no-store",headers:{}});
   if(r.status===401){location.reload();return}
   const orders=await r.json();
   if(initial){
@@ -212,7 +229,7 @@ async function confirmOrder(orderId,btn){
   if(!confirm("Bạn đã kiểm tra app ngân hàng và xác nhận đơn này đã nhận đúng số tiền?")) return;
   btn.disabled=true;
   const r=await fetch("/admin/api/orders/"+encodeURIComponent(orderId)+"/confirm",{
-    method:"POST",
+    method:"POST",headers:{}
   });
   if(!r.ok){alert("Không xác nhận được đơn.");btn.disabled=false;return}
   loadOrders(false);

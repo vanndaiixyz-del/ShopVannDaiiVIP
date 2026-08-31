@@ -11,9 +11,9 @@ const DATA = path.join(__dirname, "orders.json");
 const PUBLIC_DIR = path.join(__dirname, "public");
 const ROOT_INDEX = path.join(__dirname, "index.html");
 const ROOT_ADMIN = path.join(__dirname, "admin.html");
-const ADMIN_SALT = "66db2987fb9a7d582f39d824c195d915";
-const ADMIN_HASH = "cf84334860e91b029874675f3e04342ba3fb822595b1af17ad9470676a057b23534ddb1bc7750270d5559cca33f77743f123dfce02ec29f5a5fc7554ee1159dd";
-const BUILD_ID = "AUTH-FIX-VDVIP-V3";
+const ADMIN_PASSWORD = String(process.env.ADMIN_PASSWORD || "");
+const BUILD_ID = "SHOPVANNDAIIVIP-AUTH-ORDERS-V5";
+const ADMIN_SESSION_COOKIE = "vdvip_admin_session";
 
 const USERS_DATA = path.join(__dirname, "users.json");
 const SESSIONS_DATA = path.join(__dirname, "sessions.json");
@@ -116,24 +116,25 @@ function saveOrders(orders) {
   fs.writeFileSync(DATA, JSON.stringify(orders, null, 2), "utf8");
 }
 
-function adminCookie(req) {
-  return parseCookies(req).vdvip_admin || "";
-}
+function adminSessionId(req) { return parseCookies(req)[ADMIN_SESSION_COOKIE] || ""; }
 function adminAuthorized(req) {
-  const sid = adminCookie(req);
+  if (!ADMIN_PASSWORD) return false;
+  const sid = adminSessionId(req);
   if (!sid) return false;
-  return loadJsonArray(SESSIONS_DATA).some(s => s.admin === true && s.id === sid && (!s.expiresAt || Date.parse(s.expiresAt) > Date.now()));
+  const sessions = loadJsonArray(SESSIONS_DATA);
+  return sessions.some(x => x.type === "admin" && x.id === sid && (!x.expiresAt || Date.parse(x.expiresAt) > Date.now()));
 }
-function verifyAdminPassword(password) {
-  try {
-    const actual = crypto.scryptSync(String(password), Buffer.from(ADMIN_SALT, "hex"), 64);
-    const expected = Buffer.from(ADMIN_HASH, "hex");
-    return actual.length === expected.length && crypto.timingSafeEqual(actual, expected);
-  } catch { return false; }
-}
-function setAdminCookie(req, res, sid) {
+function setAdminSessionCookie(req, res, sid) {
   const secure = Boolean(req.secure || req.headers["x-forwarded-proto"] === "https") ? "; Secure" : "";
-  res.setHeader("Set-Cookie", `vdvip_admin=${encodeURIComponent(sid)}; Path=/; HttpOnly${secure}; SameSite=Lax; Max-Age=43200`);
+  res.setHeader("Set-Cookie", `${ADMIN_SESSION_COOKIE}=${encodeURIComponent(sid)}; Path=/; HttpOnly${secure}; SameSite=Lax; Max-Age=28800`);
+}
+function clearAdminSessionCookie(req, res) {
+  const secure = Boolean(req.secure || req.headers["x-forwarded-proto"] === "https") ? "; Secure" : "";
+  res.setHeader("Set-Cookie", `${ADMIN_SESSION_COOKIE}=; Path=/; HttpOnly${secure}; SameSite=Lax; Max-Age=0`);
+}
+function requireAdmin(req, res) {
+  if (!adminAuthorized(req)) { res.status(401).json({ error: "Phiên Admin không hợp lệ hoặc đã hết hạn." }); return false; }
+  return true;
 }
 
 function fileFor(order) {
@@ -177,7 +178,7 @@ function findProductFile(filename) {
 app.set("trust proxy", 1);
 app.use(express.json({ limit: "100kb" }));
 
-app.get("/health", (req, res) => res.json({ ok: true, service: "ShopVannĐaiiVIP", build: BUILD_ID }));
+app.get("/health", (req, res) => res.json({ ok: true, service: "ShopVannĐaiiVIP", build: BUILD_ID, adminConfigured: Boolean(ADMIN_PASSWORD) }));
 app.get("/api/version", (req, res) => res.json({ ok: true, build: BUILD_ID, adminPasswordMode: "fixed" }));
 app.get("/", (req, res) => {
   const index = path.join(PUBLIC_DIR, "index.html");
@@ -323,33 +324,29 @@ app.get("/api/orders/:id", (req, res) => {
 });
 
 // ===== ADMIN AUTH =====
-app.post("/admin/api/login", (req,res)=>{
-  try {
-    const password=String(req.body?.password||"");
-    if(!verifyAdminPassword(password)) return res.status(401).json({error:"Mật khẩu Admin không đúng."});
-    const sid=crypto.randomBytes(32).toString("hex");
-    const sessions=loadJsonArray(SESSIONS_DATA).filter(x=>!x.expiresAt || Date.parse(x.expiresAt)>Date.now());
-    sessions.push({id:sid,admin:true,createdAt:new Date().toISOString(),expiresAt:new Date(Date.now()+43200000).toISOString()});
-    saveJsonArray(SESSIONS_DATA,sessions);
-    setAdminCookie(req,res,sid);
-    res.json({ok:true});
-  } catch(err) {
-    console.error("ADMIN_LOGIN_ERROR",err);
-    res.status(500).json({error:"Máy chủ Admin đang gặp lỗi."});
-  }
+app.post("/admin/api/login", (req, res) => {
+  if (!ADMIN_PASSWORD) return res.status(503).json({ error: "Admin chưa được cấu hình mật khẩu trên Render." });
+  const supplied = String(req.body?.password || "");
+  if (!supplied || supplied !== ADMIN_PASSWORD) return res.status(401).json({ error: "Mật khẩu không đúng." });
+  const sid = crypto.randomBytes(32).toString("hex");
+  const sessions = loadJsonArray(SESSIONS_DATA).filter(x => !x.expiresAt || Date.parse(x.expiresAt) > Date.now());
+  sessions.push({ id:sid, type:"admin", createdAt:new Date().toISOString(), expiresAt:new Date(Date.now()+28800000).toISOString() });
+  saveJsonArray(SESSIONS_DATA, sessions);
+  setAdminSessionCookie(req, res, sid);
+  res.json({ ok:true });
 });
-app.get("/admin/api/me",(req,res)=>res.json({authenticated:adminAuthorized(req)}));
-app.post("/admin/api/logout",(req,res)=>{
-  const sid=adminCookie(req);
-  saveJsonArray(SESSIONS_DATA,loadJsonArray(SESSIONS_DATA).filter(x=>x.id!==sid));
-  const secure=Boolean(req.secure || req.headers["x-forwarded-proto"]==="https") ? "; Secure" : "";
-  res.setHeader("Set-Cookie",`vdvip_admin=; Path=/; HttpOnly${secure}; SameSite=Lax; Max-Age=0`);
-  res.json({ok:true});
+app.post("/admin/api/logout", (req, res) => {
+  const sid = adminSessionId(req);
+  const sessions = loadJsonArray(SESSIONS_DATA).filter(x => x.id !== sid);
+  saveJsonArray(SESSIONS_DATA, sessions);
+  clearAdminSessionCookie(req, res);
+  res.json({ ok:true });
 });
+app.get("/admin/api/me", (req, res) => res.json({ authenticated: adminAuthorized(req) }));
 
 // ===== ADMIN =====
 app.post("/admin/api/test-order", (req, res) => {
-  if (!adminAuthorized(req)) return res.status(401).json({ error: "Unauthorized" });
+  if (!requireAdmin(req, res)) return;
   const { product, edition } = req.body || {};
   if (!products[product]) return res.status(400).json({ error: "Sản phẩm không hợp lệ" });
   const now = new Date().toISOString();
@@ -359,7 +356,7 @@ app.post("/admin/api/test-order", (req, res) => {
 });
 
 app.get("/admin/api/orders", (req, res) => {
-  if (!adminAuthorized(req)) return res.status(401).json({ error: "Unauthorized" });
+  if (!requireAdmin(req, res)) return;
   res.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
   res.set("Pragma", "no-cache");
   res.set("Expires", "0");
@@ -380,7 +377,7 @@ app.get("/admin/api/orders", (req, res) => {
 });
 
 app.post("/admin/api/orders/:orderId/confirm", (req, res) => {
-  if (!adminAuthorized(req)) return res.status(401).json({ error: "Unauthorized" });
+  if (!requireAdmin(req, res)) return;
 
   const orders = loadOrders();
   const order = orders.find(o => o.id === req.params.orderId);

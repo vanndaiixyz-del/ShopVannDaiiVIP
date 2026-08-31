@@ -8,4 +8,4 @@ Bản này giữ luồng shop hiện tại và chỉnh giao diện để các m�
 
 Trên điện thoại, từng danh mục là một khối riêng; các sản phẩm nằm gọn trong khối của chính danh mục đó, tránh tình trạng hai danh mục bị trộn vào nhau.
 
-Mật khẩu Admin: `VDVIP`
+Mật khẩu Admin được kiểm tra bằng verifier server-side cố định; không lưu plaintext trong frontend.

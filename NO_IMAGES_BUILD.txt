@@ -1,0 +1,5 @@
+ShopVannĐaiiVIP NO-IMAGES build
+
+- Removed shop/logo/hero/product image assets and image display code.
+- Kept payment-qr.png because QR is required for the existing payment flow.
+- AIM product data and private product files were not removed.

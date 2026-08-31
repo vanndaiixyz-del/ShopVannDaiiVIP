@@ -1,24 +1,117 @@
 {
   "AIM_FLIZA": [
     {
+      "id": "aim-lock",
+      "name": "AIMLOCK VIP",
       "price_vnd": 250000,
       "variants": {
-        "FFTH": "AIMLOCK_V1_FFTH.zip",
-        "FFM": "AIMLOCK_V1_FFM.zip"
-      }
+        "normal": null,
+        "max": null
+      },
+      "file_status": "missing_from_uploaded_zip"
     },
     {
+      "id": "fliza-aimlock-supper",
       "name": "AIMLOCK SUPPER",
       "price_vnd": 250000,
       "variant": "FFTH",
       "file": "AIMLOCK_SUPPER.zip"
+    },
+    {
+      "id": "aim-drag",
+      "name": "AIM DRAG",
+      "price_vnd": 350000,
+      "file": "AIMDRAG-Vanndaiixyz.zip"
+    },
+    {
+      "id": "aim-body",
+      "name": "AIM BODY",
+      "price_vnd": 100000,
+      "file": "Aim Body 100% Antiban.zip"
+    },
+    {
+      "id": "aim-neck",
+      "name": "AIM NECK",
+      "price_vnd": 350000,
+      "file": "AIM NECK NEW.zip"
     }
   ],
   "AIM_3105": [
     {
+      "id": "3105-lock",
+      "name": "AIMLOCK VIP",
       "price_vnd": 250000,
       "variant": "FFTH",
-      "file": "AIMLOCK_V1_3105.zip"
+      "file_status": "missing_from_uploaded_zip"
+    },
+    {
+      "id": "3105-neck",
+      "name": "AIM NECK",
+      "price_vnd": 350000,
+      "variant": "FFTH",
+      "file": "AIM NECK NEW.zip"
+    },
+    {
+      "id": "3105-body",
+      "name": "AIM BODY 3105",
+      "price_vnd": 100000,
+      "variant": "FFTH",
+      "file": "AIM BODY 100k (2).zip"
+    },
+    {
+      "id": "3105-drag",
+      "name": "AIM DRAG",
+      "price_vnd": 350000,
+      "variant": "FFTH",
+      "file": "AIM DRAG NEW.zip"
+    },
+    {
+      "id": "3105-head",
+      "name": "AIM HEAD",
+      "price_vnd": 400000,
+      "variant": "FFTH",
+      "file": "AIM HEAD.zip"
+    },
+    {
+      "id": "3105-drag-vip-v1",
+      "name": "DRAG VIP V1",
+      "price_vnd": 400000,
+      "variant": "FFTH",
+      "file": "DRAG VIP V1.zip"
+    },
+    {
+      "id": "3105-drag-new",
+      "name": "AIM DRAG NEW",
+      "price_vnd": 350000,
+      "variant": "FFTH",
+      "file": "AIM DRAG NEW.zip"
+    },
+    {
+      "id": "3105-neck-new",
+      "name": "AIM NECK NEW",
+      "price_vnd": 350000,
+      "variant": "FFTH",
+      "file": "AIM NECK NEW.zip"
+    },
+    {
+      "id": "3105-magic",
+      "name": "AIM MAGIC",
+      "price_vnd": 150000,
+      "variant": "FFTH",
+      "file": "AIM MAGIC.zip"
     }
-  ]
+  ],
+  "AIM_ADR": [
+    {
+      "id": "adr-aimlock",
+      "name": "AIMLOCK",
+      "price_vnd": 350000,
+      "file": "AIMLOCK VIP ADR.zip"
+    }
+  ],
+  "TUI_MU": {
+    "id": "blind-bag",
+    "name": "TÚI MÙ",
+    "price_vnd": 50000
+  }
 }

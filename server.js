@@ -11,8 +11,13 @@ const DATA = path.join(__dirname, "orders.json");
 const PUBLIC_DIR = path.join(__dirname, "public");
 const ROOT_INDEX = path.join(__dirname, "index.html");
 const ROOT_ADMIN = path.join(__dirname, "admin.html");
-const ADMIN_PASSWORD = String(process.env.ADMIN_PASSWORD || "");
-const BUILD_ID = "SHOPVANNDAIIVIP-AUTH-ORDERS-V5";
+// Admin authentication is verified server-side only.
+// The fixed password is stored as a scrypt verifier, not as plaintext.
+// This keeps the password out of all frontend HTML/JS and avoids a missing
+// Render environment variable causing "Admin password wrong" on every login.
+const ADMIN_PASSWORD_SALT = "d738676626b2d510f0f5b2c5e6f15d24";
+const ADMIN_PASSWORD_HASH = "736eec60a1ebb2ca901103aa42d6dda72daeb6468f99601d171ec9f4fcf40c9658461fe9dbf161c93100403305af98a73d66c1ea9800a3387dd111d59ee2168a";
+const BUILD_ID = "SHOPVANNDAIIVIP-AUTH-ORDERS-AIM-V7";
 const ADMIN_SESSION_COOKIE = "vdvip_admin_session";
 
 const USERS_DATA = path.join(__dirname, "users.json");
@@ -73,6 +78,17 @@ function verifyPassword(password, salt, expected) {
     return false;
   }
 }
+function verifyAdminPassword(password) {
+  try {
+    const actual = crypto.scryptSync(String(password), ADMIN_PASSWORD_SALT, 64).toString("hex");
+    const a = Buffer.from(actual, "hex");
+    const b = Buffer.from(ADMIN_PASSWORD_HASH, "hex");
+    return a.length === b.length && crypto.timingSafeEqual(a, b);
+  } catch (err) {
+    console.error("Admin password verification failed:", err.message);
+    return false;
+  }
+}
 function formatVN(iso) {
   if(!iso) return {date:"-", time:"-"};
   const d=new Date(iso);
@@ -118,7 +134,6 @@ function saveOrders(orders) {
 
 function adminSessionId(req) { return parseCookies(req)[ADMIN_SESSION_COOKIE] || ""; }
 function adminAuthorized(req) {
-  if (!ADMIN_PASSWORD) return false;
   const sid = adminSessionId(req);
   if (!sid) return false;
   const sessions = loadJsonArray(SESSIONS_DATA);
@@ -138,17 +153,27 @@ function requireAdmin(req, res) {
 }
 
 function fileFor(order) {
-  if (order.product === "aim-lock") return order.edition === "max" ? "AIMLOCK-FreeFireMAX.zip" : "AIMLOCK-FreeFire.zip";
-  if (order.product === "fliza-aimlock-v1") return order.edition === "ffm" ? "AIMLOCK_V1_FFM.zip" : order.edition === "ffth" ? "AIMLOCK_V1_FFTH.zip" : null;
+  // Only filenames that actually exist in this package are mapped here.
+  // The two historical AIMLOCK VIP binaries are intentionally not fabricated:
+  // their source files are not present in the uploaded package.
+  if (order.product === "aim-lock") return null;
+  if (order.product === "fliza-aimlock-v1") return null;
   if (order.product === "fliza-aimlock-supper") return "AIMLOCK_SUPPER.zip";
   return {
-    "aim-drag":"AIM-DRAG.zip", "aim-body":"AIM-BODY.zip", "aim-neck":"AIM-NECK.zip",
-    "3105-lock":"AIMLOCK-3105.zip", "3105-neck":"AIMNECK-3105.zip",
-    "3105-body":"AIMBODY-3105.zip", "3105-drag":"AIMDRAG-3105.zip",
-    "3105-head":"AIM HEAD.zip", "3105-drag-vip-v1":"DRAG VIP V1.zip",
-    "3105-drag-new":"AIM DRAG NEW.zip", "3105-neck-new":"AIM NECK NEW.zip",
-    "3105-magic":"AIM MAGIC.zip", "adr-aimlock":"AIMLOCK VIP ADR.zip"
-  }[order.product];
+    "aim-drag":"AIMDRAG-Vanndaiixyz.zip",
+    "aim-body":"Aim Body 100% Antiban.zip",
+    "aim-neck":"AIM NECK NEW.zip",
+    "3105-lock":null,
+    "3105-neck":"AIM NECK NEW.zip",
+    "3105-body":"AIM BODY 100k (2).zip",
+    "3105-drag":"AIM DRAG NEW.zip",
+    "3105-head":"AIM HEAD.zip",
+    "3105-drag-vip-v1":"DRAG VIP V1.zip",
+    "3105-drag-new":"AIM DRAG NEW.zip",
+    "3105-neck-new":"AIM NECK NEW.zip",
+    "3105-magic":"AIM MAGIC.zip",
+    "adr-aimlock":"AIMLOCK VIP ADR.zip"
+  }[order.product] || null;
 }
 
 function findProductFile(filename) {
@@ -178,7 +203,7 @@ function findProductFile(filename) {
 app.set("trust proxy", 1);
 app.use(express.json({ limit: "100kb" }));
 
-app.get("/health", (req, res) => res.json({ ok: true, service: "ShopVannĐaiiVIP", build: BUILD_ID, adminConfigured: Boolean(ADMIN_PASSWORD) }));
+app.get("/health", (req, res) => res.json({ ok: true, service: "ShopVannĐaiiVIP", build: BUILD_ID, adminConfigured: true }));
 app.get("/api/version", (req, res) => res.json({ ok: true, build: BUILD_ID, adminPasswordMode: "fixed" }));
 app.get("/", (req, res) => {
   const index = path.join(PUBLIC_DIR, "index.html");
@@ -274,7 +299,17 @@ app.get("/payment-qr.png", (req, res) => {
 });
 app.use(express.static(PUBLIC_DIR));
 
-app.get("/api/products", (req, res) => res.json(products));
+app.get("/api/products", (req, res) => {
+  const result = {};
+  for (const [id, product] of Object.entries(products)) {
+    const sample = { ...product };
+    const filename = fileFor({ product:id, edition:null });
+    sample.fileAvailable = Boolean(filename && findProductFile(filename));
+    result[id] = sample;
+  }
+  res.set("Cache-Control", "no-store");
+  res.json(result);
+});
 
 app.post("/api/orders", (req, res) => {
   const user = currentUser(req);
@@ -325,9 +360,8 @@ app.get("/api/orders/:id", (req, res) => {
 
 // ===== ADMIN AUTH =====
 app.post("/admin/api/login", (req, res) => {
-  if (!ADMIN_PASSWORD) return res.status(503).json({ error: "Admin chưa được cấu hình mật khẩu trên Render." });
   const supplied = String(req.body?.password || "");
-  if (!supplied || supplied !== ADMIN_PASSWORD) return res.status(401).json({ error: "Mật khẩu không đúng." });
+  if (!supplied || !verifyAdminPassword(supplied)) return res.status(401).json({ error: "Mật khẩu không đúng." });
   const sid = crypto.randomBytes(32).toString("hex");
   const sessions = loadJsonArray(SESSIONS_DATA).filter(x => !x.expiresAt || Date.parse(x.expiresAt) > Date.now());
   sessions.push({ id:sid, type:"admin", createdAt:new Date().toISOString(), expiresAt:new Date(Date.now()+28800000).toISOString() });
@@ -402,7 +436,7 @@ function sendOrderFile(req, res) {
 
   if (order.product === "adr-aimlock") return res.redirect("https://www.mediafire.com/file/hfg7ibdd8ujtddn/AIMLOCK+VIP+ADR.zip/file");
   const file = order.product === "blind-bag" ? order.blindFile : fileFor(order);
-  if (!file) return res.status(404).send("Sản phẩm chưa được gắn file hoặc chưa random.");
+  if (!file) return res.status(404).send("File sản phẩm chưa có trong gói shop. Không tự tạo file giả.");
 
   const full = findProductFile(file);
   if (!full) return res.status(404).send(`File sản phẩm không tồn tại trên máy chủ: ${file}`);
@@ -432,11 +466,14 @@ app.get("/download/:id", sendOrderFile);
 app.get("/api/orders/:id/download", sendOrderFile);
 
 app.get("/api/orders/:id/file-status", (req, res) => {
+  const user = currentUser(req);
+  if (!user) return res.status(401).json({ error: "Vui lòng đăng nhập." });
   const order = loadOrders().find(x => x.id === req.params.id);
   if (!order) return res.status(404).json({ error: "Không tìm thấy đơn" });
+  if (order.userId !== user.id) return res.status(403).json({ error: "Bạn không có quyền xem đơn này." });
   const file = fileFor(order);
   const full = file ? findProductFile(file) : null;
-  res.json({ orderId: order.id, paid: Boolean(order.paid), file, exists: Boolean(full) });
+  res.json({ orderId: order.id, paid: Boolean(order.paid), fileAvailable: Boolean(full) });
 });
 
 app.use((err, req, res, next) => {

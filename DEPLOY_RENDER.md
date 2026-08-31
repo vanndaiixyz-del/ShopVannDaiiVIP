@@ -15,12 +15,8 @@ Tạo Web Service từ chính repository/source này:
 - Start Command: `npm start`
 - Health Check Path: `/health`
 
-## Environment Variable bắt buộc
-Trong Render → Environment thêm:
-- Key: `ADMIN_PASSWORD`
-- Value: mật khẩu Admin hiện tại của bạn
-
-Mật khẩu Admin không nằm trong HTML/JS và không được lưu vào `sessionStorage`. Server chỉ đọc biến môi trường và cấp phiên Admin HttpOnly.
+## Admin authentication
+Không cần đặt `ADMIN_PASSWORD` trên Render cho bản này. Server dùng verifier cố định ở backend và cấp phiên Admin bằng cookie HttpOnly. Plaintext mật khẩu không nằm trong HTML/JS frontend.
 
 ## Sau khi deploy
 Mở `/health`. Kết quả phải có `ok: true` và `adminConfigured: true`.

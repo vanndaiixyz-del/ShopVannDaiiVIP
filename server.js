@@ -38,11 +38,11 @@ function currentUser(req) {
   const users=loadJsonArray(USERS_DATA);
   return users.find(u=>u.id===session.userId) || null;
 }
-function setSessionCookie(res, sid) {
+function setSessionCookie(req, res, sid) {
   const secure = Boolean(req.secure || req.headers["x-forwarded-proto"] === "https") ? "; Secure" : "";
   res.setHeader("Set-Cookie", `${SESSION_COOKIE}=${encodeURIComponent(sid)}; Path=/; HttpOnly${secure}; SameSite=Lax; Max-Age=2592000`);
 }
-function clearSessionCookie(res) {
+function clearSessionCookie(req, res) {
   const secure = Boolean(req.secure || req.headers["x-forwarded-proto"] === "https") ? "; Secure" : "";
   res.setHeader("Set-Cookie", `${SESSION_COOKIE}=; Path=/; HttpOnly${secure}; SameSite=Lax; Max-Age=0`);
 }
@@ -186,10 +186,10 @@ app.post("/api/auth/login",(req,res)=>{
   const sid=crypto.randomBytes(32).toString("hex");
   const sessions=loadJsonArray(SESSIONS_DATA).filter(x=>!x.expiresAt || Date.parse(x.expiresAt)>Date.now());
   sessions.push({id:sid,userId:user.id,createdAt:new Date().toISOString(),expiresAt:new Date(Date.now()+2592000000).toISOString()});
-  saveJsonArray(SESSIONS_DATA,sessions); setSessionCookie(res,sid);
+  saveJsonArray(SESSIONS_DATA,sessions); setSessionCookie(req,res,sid);
   res.json({ok:true,email:user.email});
 });
-app.post("/api/auth/logout",(req,res)=>{ const sid=parseCookies(req)[SESSION_COOKIE]; const sessions=loadJsonArray(SESSIONS_DATA).filter(x=>x.id!==sid); saveJsonArray(SESSIONS_DATA,sessions); clearSessionCookie(res); res.json({ok:true}); });
+app.post("/api/auth/logout",(req,res)=>{ const sid=parseCookies(req)[SESSION_COOKIE]; const sessions=loadJsonArray(SESSIONS_DATA).filter(x=>x.id!==sid); saveJsonArray(SESSIONS_DATA,sessions); clearSessionCookie(req,res); res.json({ok:true}); });
 app.get("/api/auth/me",(req,res)=>{const u=currentUser(req); res.json({authenticated:Boolean(u),user:u?{id:u.id,email:u.email}:null});});
 app.get("/api/account/orders",(req,res)=>{
   const u=requireUser(req,res); if(!u) return;

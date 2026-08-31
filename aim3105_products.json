@@ -1,0 +1,55 @@
+{
+  "category": "AIM 3105",
+  "products": [
+    {
+      "name": "AIM HEAD",
+      "price": "400k",
+      "desc": [
+        "Kéo là đỏ",
+        "Cân rank",
+        "Cân phòng"
+      ],
+      "install": "Vào sảnh → thoát ra → dán"
+    },
+    {
+      "name": "DRAG VIP V1",
+      "price": "400k",
+      "desc": [
+        "Kéo là đỏ",
+        "Cân rank",
+        "Cân phòng"
+      ],
+      "install": "Vào sảnh → thoát ra → dán"
+    },
+    {
+      "name": "AIM DRAG NEW",
+      "price": "350k",
+      "desc": [
+        "kéo là đỏ",
+        "cân Rank",
+        "cân phòng"
+      ],
+      "install": "Vào sảnh → thoát ra → dán"
+    },
+    {
+      "name": "AIM NECK NEW",
+      "price": "350k",
+      "desc": [
+        "Kéo là đỏ",
+        "Cân rank",
+        "Cân phòng"
+      ],
+      "install": "Vào sảnh → thoát ra → dán"
+    },
+    {
+      "name": "AIM MAGIC",
+      "price": "150k",
+      "desc": [
+        "bắn xung quanh người vẫn tính dame",
+        "an toàn 100%"
+      ],
+      "install": "Vào sảnh → thoát ra → dán"
+    }
+  ],
+  "note": "Product descriptions/installation instructions prepared for shop integration."
+}

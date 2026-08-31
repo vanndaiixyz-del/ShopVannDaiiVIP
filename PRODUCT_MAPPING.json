@@ -1,0 +1,24 @@
+{
+  "AIM_FLIZA": [
+    {
+      "price_vnd": 250000,
+      "variants": {
+        "FFTH": "AIMLOCK_V1_FFTH.zip",
+        "FFM": "AIMLOCK_V1_FFM.zip"
+      }
+    },
+    {
+      "name": "AIMLOCK SUPPER",
+      "price_vnd": 250000,
+      "variant": "FFTH",
+      "file": "AIMLOCK_SUPPER.zip"
+    }
+  ],
+  "AIM_3105": [
+    {
+      "price_vnd": 250000,
+      "variant": "FFTH",
+      "file": "AIMLOCK_V1_3105.zip"
+    }
+  ]
+}

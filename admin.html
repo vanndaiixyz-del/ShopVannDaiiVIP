@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" type="image/png" sizes="512x512" href="./assets/favicon.png?v=20260827-2">
+<link rel="apple-touch-icon" sizes="180x180" href="./assets/apple-touch-icon.png?v=20260827-2">
+<title>ShopVannĐaiiVIP — Admin</title>
+<style>
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#0d0f14;color:#fff;margin:0}
+header{padding:22px 16px;background:#151923}
+main{max-width:900px;margin:auto;padding:16px}
+.panel{background:#171b25;border:1px solid #292f3d;border-radius:16px;padding:16px;margin-bottom:16px}
+input,button{width:100%;box-sizing:border-box;padding:12px;border-radius:10px;font-size:16px}
+input{background:#0d0f14;color:#fff;border:1px solid #343b4c;margin:8px 0 12px}
+button{border:0;background:#fff;color:#111;font-weight:700}
+button:disabled{opacity:.5}
+.order{border:1px solid #303747;border-radius:14px;padding:14px;margin:12px 0;background:#12151d}
+.row{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin:5px 0}
+.pending{color:#ffd166}.paid{color:#8ef0ad}.error{color:#ff9b9b}
+.small{font-size:13px;color:#aeb5c4}
+</style>
+</head>
+<body>
+<header><h1>ShopVannĐaiiVIP Admin <span id="newOrderBadge" style="display:none;background:#ff3b30;color:#fff;border-radius:999px;padding:4px 9px;font-size:14px;vertical-align:middle">0 đơn mới</span></h1></header>
+<main>
+  <div id="orderNotice" style="display:none;position:fixed;right:12px;top:12px;left:auto;width:min(420px,calc(100vw - 24px));z-index:99999;background:#10251a;border:1px solid #2bd576;color:#8ef0ad;border-radius:14px;padding:14px 16px;margin-bottom:14px;box-shadow:0 8px 30px rgba(0,0,0,.25)">🔔 <strong id="noticeText">Có đơn hàng mới</strong><button onclick="dismissNotice()" style="width:auto;float:right;padding:6px 10px;margin:-5px -4px 0 10px">Đóng</button></div>
+  <section class="panel" id="login">
+    <h2>Đăng nhập Admin</h2>
+    <input id="password" type="password" placeholder="Mật khẩu Admin">
+    <button onclick="login()">Đăng nhập</button>
+    <p id="loginStatus" class="small"></p>
+    <p class="small">Sau khi đăng nhập, bấm <b>🔔 Bật thông báo</b> một lần để cho phép âm báo/thông báo trình duyệt.</p>
+  </section>
+
+  <section class="panel" id="testPanel" style="display:none">
+    <h2>Admin Test — Mua FREE</h2>
+    <p class="small">Admin có thể tạo đơn 0đ để kiểm tra luồng.</p>
+    <select id="testProduct" style="width:100%;padding:12px;border-radius:10px;background:#0d0f14;color:#fff;border:1px solid #343b4c"></select>
+    <button onclick="createTestOrder()">Mua FREE (0đ)</button>
+    <p id="testStatus" class="small"></p>
+  </section>
+
+  <section class="panel" id="dashboard" style="display:none">
+    <div class="row">
+      <h2>Danh sách đơn hàng</h2>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button id="notifyBtn" style="width:auto;padding:9px 14px" onclick="enableNotifications(true)">🔔 Bật thông báo</button>
+        <button style="width:auto;padding:9px 14px" onclick="testNotification()">🔊 Test</button>
+        <button style="width:auto;padding:9px 14px" onclick="loadOrders(false,true)">Làm mới</button>
+      </div>
+    </div>
+    <div id="orders"></div>
+  </section>
+</main>
+<script>
+let adminPassword = sessionStorage.getItem("admin_password") || "";
+let knownOrderIds = new Set();
+let pollingTimer = null;
+let audioCtx = null;
+let notificationPermissionAsked = false;
+let notificationEnabled = false;
+let newOrderCount = 0;
+if(adminPassword) showDashboard();
+
+async function login(){
+  adminPassword=document.getElementById("password").value;
+  const r=await fetch("/admin/api/orders",{headers:{"x-admin-password":adminPassword}});
+  if(!r.ok){
+    document.getElementById("loginStatus").textContent="Mật khẩu không đúng.";
+    adminPassword="";
+    return;
+  }
+  sessionStorage.setItem("admin_password",adminPassword);
+  showDashboard();
+}
+
+function showDashboard(){
+  document.getElementById("login").style.display="none";
+  document.getElementById("dashboard").style.display="block";
+  document.getElementById("testPanel").style.display="block";
+  loadTestProducts();
+  loadOrders(true);
+  startOrderPolling();
+}
+
+async function enableNotifications(fromUser=false){
+  if(!("Notification" in window)) {
+    const b=document.getElementById("notifyBtn"); if(b) b.textContent="🔔 Thông báo trong trang";
+    return false;
+  }
+  if(!fromUser && notificationPermissionAsked) return notificationEnabled;
+  notificationPermissionAsked=true;
+  try {
+    if(Notification.permission === "default") {
+      if(!fromUser) return false; // iOS/Safari generally requires a user gesture.
+      const permission=await Notification.requestPermission();
+      notificationEnabled=permission === "granted";
+      if(fromUser) playOrderSound();
+    } else {
+      notificationEnabled=Notification.permission === "granted";
+    }
+    const b=document.getElementById("notifyBtn");
+    if(b) b.textContent=notificationEnabled ? "🔔 Đã bật thông báo" : "🔔 Bật thông báo";
+    return notificationEnabled;
+  } catch { return false; }
+}
+
+function testNotification(){
+  playOrderSound();
+  const notice=document.getElementById("orderNotice");
+  const text=document.getElementById("noticeText");
+  text.textContent="🔔 Test thành công — Admin sẽ báo khi có đơn mới.";
+  notice.style.display="block";
+  if(navigator.vibrate) try{navigator.vibrate([120,80,120])}catch{}
+  setTimeout(()=>{notice.style.display="none"},3500);
+  if(notificationEnabled && "Notification" in window && Notification.permission === "granted") {
+    try { new Notification("ShopVannĐaiiVIP — Test", {body:"Thông báo đã được bật thành công."}); } catch {}
+  }
+}
+
+function playOrderSound(){
+  try {
+    if(audioCtx && audioCtx.state === "suspended") audioCtx.resume();
+    audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+    const o=audioCtx.createOscillator(), g=audioCtx.createGain();
+    o.type="sine"; o.frequency.value=880; g.gain.value=0.0001;
+    o.connect(g); g.connect(audioCtx.destination);
+    const now=audioCtx.currentTime; g.gain.exponentialRampToValueAtTime(0.16,now+0.02); g.gain.exponentialRampToValueAtTime(0.0001,now+0.45);
+    o.start(now); o.stop(now+0.5);
+  } catch {}
+}
+
+function showNewOrderNotification(order){
+  newOrderCount++;
+  const badge=document.getElementById("newOrderBadge");
+  badge.textContent=`${newOrderCount} đơn mới`; badge.style.display="inline-block";
+  const productName = order.productName || order.product || "Sản phẩm";
+  document.getElementById("noticeText").textContent=`🔔 Có người mua: ${productName} — Cần bạn xác thực — ${money(order.amount||0)} — ${order.orderId}`;
+  document.getElementById("orderNotice").style.display="block";
+  playOrderSound();
+  if(navigator.vibrate) try{navigator.vibrate([160,80,160,80,220])}catch{}
+  if(notificationEnabled && "Notification" in window && Notification.permission === "granted") {
+    try { new Notification("ShopVannĐaiiVIP — Có người mua", {body:`${productName} • Cần bạn xác thực • ${money(order.amount||0)} • ${order.orderId}`}); } catch {}
+  }
+  document.title=`(${newOrderCount}) Đơn mới — ShopVannĐaiiVIP`;
+}
+
+function dismissNotice(){
+  document.getElementById("orderNotice").style.display="none";
+  newOrderCount=0;
+  document.getElementById("newOrderBadge").style.display="none";
+  document.title="ShopVannĐaiiVIP — Admin";
+}
+
+function startOrderPolling(){
+  enableNotifications(false);
+  if(pollingTimer) clearInterval(pollingTimer);
+  pollingTimer=setInterval(()=>loadOrders(false),3000);
+}
+
+async function loadTestProducts(){
+  const r=await fetch("/api/products"); const data=await r.json();
+  document.getElementById("testProduct").innerHTML=Object.entries(data).map(([id,p])=>`<option value="${id}">${p.name} — ${money(p.price)}</option>`).join("");
+}
+async function createTestOrder(){
+  const product=document.getElementById("testProduct").value;
+  const r=await fetch("/admin/api/test-order",{method:"POST",headers:{"x-admin-password":adminPassword,"Content-Type":"application/json"},body:JSON.stringify({product})});
+  const x=await r.json();
+  document.getElementById("testStatus").textContent=r.ok?`Đơn FREE: ${x.orderId} — 0đ — ${x.status}`:(x.error||"Không tạo được đơn test");
+  if(r.ok) loadOrders(false);
+}
+
+function money(n){return new Intl.NumberFormat("vi-VN").format(n)+"đ"}
+
+async function loadOrders(initial=false,manual=false){
+  const r=await fetch("/admin/api/orders?_="+Date.now(),{cache:"no-store",headers:{"x-admin-password":adminPassword}});
+  if(r.status===401){sessionStorage.removeItem("admin_password");location.reload();return}
+  const orders=await r.json();
+  if(initial){
+    knownOrderIds=new Set(orders.map(o=>o.orderId));
+  } else if(manual){
+    orders.forEach(o=>knownOrderIds.add(o.orderId));
+  } else {
+    const fresh=orders.filter(o=>!knownOrderIds.has(o.orderId));
+    fresh.slice().reverse().forEach(showNewOrderNotification);
+    orders.forEach(o=>knownOrderIds.add(o.orderId));
+  }
+  const box=document.getElementById("orders");
+
+  if(!orders.length){
+    box.innerHTML="<p class='small'>Chưa có đơn hàng.</p>";
+    return;
+  }
+
+  box.innerHTML=orders.map(o=>{
+    const paid=(o.status==="PAID"||o.paid);
+    return `<div class="order">
+      <div class="row"><strong>${o.orderId}</strong><span class="${paid?'paid':'pending'}">${paid?'ĐÃ THANH TOÁN':'CHỜ THANH TOÁN'}</span></div>
+      <div class="row"><span>Sản phẩm</span><strong>${o.product||"-"}</strong></div>
+      ${o.edition?`<div class="row"><span>Phiên bản</span><strong>${o.edition}</strong></div>`:""}
+      <div class="row"><span>Số tiền</span><strong>${money(o.amount||0)}</strong></div>
+      <div class="small">Tạo: ${o.purchaseDate&&o.purchaseTime ? `${o.purchaseDate} ${o.purchaseTime}` : (o.createdAt||"-")}</div>
+      ${paid
+        ? `<div class="small">Đã xác nhận: ${o.confirmedDate&&o.confirmedTime ? `${o.confirmedDate} ${o.confirmedTime}` : (o.paidAt||"-")}</div>`
+        : `<button style="margin-top:12px" onclick="confirmOrder('${o.orderId}',this)">Xác nhận đã thanh toán</button>`}
+    </div>`;
+  }).join("");
+}
+
+async function confirmOrder(orderId,btn){
+  if(!confirm("Bạn đã kiểm tra app ngân hàng và xác nhận đơn này đã nhận đúng số tiền?")) return;
+  btn.disabled=true;
+  const r=await fetch("/admin/api/orders/"+encodeURIComponent(orderId)+"/confirm",{
+    method:"POST",headers:{"x-admin-password":adminPassword}
+  });
+  if(!r.ok){alert("Không xác nhận được đơn.");btn.disabled=false;return}
+  loadOrders(false);
+}
+</script>
+<div style="text-align:center;margin:24px"><a href="account.html">Đăng nhập / Lịch sử mua</a></div></body>
+</html>

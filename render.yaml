@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: shopvann-daii-vip
+    runtime: node
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: ADMIN_PASSWORD
+        sync: false

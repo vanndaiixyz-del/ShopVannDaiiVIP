@@ -114,7 +114,7 @@ const blindBagFiles = ["aimbot head ff normal(1).zip", "Aim Body 100% Antiban.zi
 
 const products = {
   "aim-lock": { name: "AIMLOCK VIP", price: 350000 },
-  "fliza-aimlock-supper": { name: "AIMLOCK SUPPER", price: 500000, type:"FFTH + FFM", category:"AIM FLIZA" },
+  "fliza-aimlock-supper": { name: "AIMLOCK SUPPER", price: 500000, type:"Chọn FFTH + FFM", category:"AIM FLIZA" },
   "aim-drag": { name: "AIM DRAG", price: 350000 },
   "aim-body": { name: "AIM BODY", price: 350000 },
   "aim-neck": { name: "AIM NECK", price: 350000 },
@@ -179,8 +179,11 @@ function fileFor(order) {
   if (order?.product === "3105-lock") {
     return "AIMLOCK VIP 3105.zip";
   }
+  if (order?.product === "fliza-aimlock-supper") {
+    return order.edition === "ffth" ? "AIMLOCK SUPPER FFTH.zip" : order.edition === "ffm" ? "AIMLOCK SUPPER FFM.zip" : null;
+  }
   const files = {
-    "fliza-aimlock-supper": "AIMLOCK_SUPPER.zip",
+    "fliza-aimlock-supper": null,
     "3105-supper": "AIM 3105/AIMLOCK SUPPER FFTH/AIMLOCK SUPPER 3105.zip",
     "aim-drag": "AIMDRAG-Vanndaiixyz.zip",
     "aim-body": "Aim Body 100% Antiban.zip",
@@ -355,7 +358,7 @@ app.post("/api/orders", (req, res) => {
     const mappedFile = fileFor({ product, edition: edition || null });
     if (!mappedFile || !findProductFile(mappedFile)) return res.status(409).json({ error: "File sản phẩm hiện chưa có trên máy chủ." });
   }
-  if (product === "aim-lock" && !["ffth", "ffm"].includes(edition)) {
+  if (["aim-lock", "fliza-aimlock-supper"].includes(product) && !["ffth", "ffm"].includes(edition)) {
     return res.status(400).json({ error: "Vui lòng chọn FFTH hoặc FFM" });
   }
 
@@ -439,7 +442,7 @@ app.post("/admin/api/test-order", (req, res) => {
   if (!requireAdmin(req, res)) return;
   const { product, edition } = req.body || {};
   if (!products[product]) return res.status(400).json({ error: "Sản phẩm không hợp lệ" });
-  if (product === "aim-lock" && !["ffth", "ffm"].includes(edition)) {
+  if (["aim-lock", "fliza-aimlock-supper"].includes(product) && !["ffth", "ffm"].includes(edition)) {
     return res.status(400).json({ error: "Vui lòng chọn FFTH hoặc FFM" });
   }
   if (product !== "blind-bag" && product !== "adr-aimlock") {

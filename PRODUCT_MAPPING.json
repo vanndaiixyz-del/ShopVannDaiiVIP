@@ -14,7 +14,10 @@
       "name": "AIMLOCK SUPPER",
       "price_vnd": 500000,
       "variant": "FFTH + FFM",
-      "file": "private_files/AIM FLIZA/AIMLOCK_SUPPER.zip"
+      "variants": {
+        "ffth": "private_files/AIM FLIZA/AIMLOCK SUPPER FFTH.zip",
+        "ffm": "private_files/AIM FLIZA/AIMLOCK SUPPER FFM.zip"
+      }
     },
     {
       "id": "aim-drag",

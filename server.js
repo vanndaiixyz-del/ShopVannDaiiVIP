@@ -110,7 +110,7 @@ function formatVN(iso) {
 }
 function requireUser(req,res) { const u=currentUser(req); if(!u){res.status(401).json({error:"Vui lòng đăng nhập."}); return null;} return u; }
 
-const blindBagFiles = ["aimbot head ff normal(1).zip", "Aim Body 100% Antiban.zip", "AIM DRAG 6.0 Vanndaiixyz (1).zip", "AIM DRAG V3 Vanndaiixyz(1).zip", "AIMDRAG-Vanndaiixyz.zip", "HEADLOCK V3 Vanndaiixyz(1).zip", "AIM CΓö£╞Æ╬ô├▓├╣Γö£Γûô FFTH 200K Vanndaiixyz (1).zip", "Aim NgΓö£╞Æ╬ô├▓├╣╬ô├╗├åc 100% Vanndaiixyz(1).zip", "AIM Drag FFTH+FFM Vanndaiixyz (1).zip", "AIM BODY 100k (2).zip", "AIM C╬ô├╢┬úΓò₧├åΓò¼├┤Γö£ΓûôΓö£Γòú╬ô├╢┬ú╬ô├╗├┤ FFTH 200K Vanndaiixyz (1).zip"];
+const blindBagFiles = ["aimbot head ff normal(1).zip", "Aim Body 100% Antiban.zip", "AIM DRAG 6.0 Vanndaiixyz (1).zip", "AIM DRAG V3 Vanndaiixyz(1).zip", "AIMDRAG-Vanndaiixyz.zip", "HEADLOCK V3 Vanndaiixyz(1).zip", "AIM CΓö£╞Æ╬ô├▓├╣Γö£Γûô FFTH 350K Vanndaiixyz (1).zip", "Aim NgΓö£╞Æ╬ô├▓├╣╬ô├╗├åc 100% Vanndaiixyz(1).zip", "AIM Drag FFTH+FFM Vanndaiixyz (1).zip", "AIM BODY 100k (2).zip", "AIM C╬ô├╢┬úΓò₧├åΓò¼├┤Γö£ΓûôΓö£Γòú╬ô├╢┬ú╬ô├╗├┤ FFTH 350K Vanndaiixyz (1).zip"];
 
 const products = {
   "aim-lock": { name: "AIMLOCK VIP", price: 350000 },

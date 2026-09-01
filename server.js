@@ -110,24 +110,23 @@ function formatVN(iso) {
 }
 function requireUser(req,res) { const u=currentUser(req); if(!u){res.status(401).json({error:"Vui lòng đăng nhập."}); return null;} return u; }
 
-const blindBagFiles = ["aimbot head ff normal(1).zip", "Aim Body 100% Antiban.zip", "AIM DRAG 6.0 Vanndaiixyz (1).zip", "AIM DRAG V3 Vanndaiixyz(1).zip", "AIMDRAG-Vanndaiixyz.zip", "HEADLOCK V3 Vanndaiixyz(1).zip", "AIM CΓö£╞Æ╬ô├▓├╣Γö£Γûô FFTH 350K Vanndaiixyz (1).zip", "Aim NgΓö£╞Æ╬ô├▓├╣╬ô├╗├åc 100% Vanndaiixyz(1).zip", "AIM Drag FFTH+FFM Vanndaiixyz (1).zip", "AIM BODY 100k (2).zip", "AIM C╬ô├╢┬úΓò₧├åΓò¼├┤Γö£ΓûôΓö£Γòú╬ô├╢┬ú╬ô├╗├┤ FFTH 350K Vanndaiixyz (1).zip"];
+const blindBagFiles = ["private_files/aimbot head ff normal(1).zip","private_files/AimBody 200k Vanndaiixyz(1).zip","private_files/AIM Drag FFTH+FFM Vanndaiixyz (1).zip","private_files/AIM Cổ FFTH 200K Vanndaiixyz (1).zip","private_files/Aim Cổ 100% Vanndaiixyz (1).zip","private_files/Aim Cổ Siêu Bá Vanndaiixyz (1).zip","private_files/Aim Body 100% Antiban.zip","private_files/AIM DRAG 6.0 Vanndaiixyz (1).zip","private_files/Aim Ngực 100% Vanndaiixyz(1).zip","private_files/AIM DRAG V3 Vanndaiixyz(1).zip","private_files/AIMDRAG-Vanndaiixyz.zip","private_files/AIM BODY 100k (2).zip","private_files/HEADLOCK V3 Vanndaiixyz(1).zip"];
 
 const products = {
-  "aim-lock": { name: "AIMLOCK VIP", price: 350000 },
-  "fliza-aimlock-supper": { name: "AIMLOCK SUPPER", price: 500000, type:"Chọn FFTH + FFM", category:"AIM FLIZA" },
+  "aim-lock": { name: "AIMLOCK VIP", price: 250000 },
+  "fliza-aimlock-supper": { name: "AIMLOCK SUPPER", price: 250000, type:"FFTH", category:"AIM FLIZA" },
   "aim-drag": { name: "AIM DRAG", price: 350000 },
-  "aim-body": { name: "AIM BODY", price: 350000 },
+  "aim-body": { name: "AIM BODY", price: 100000 },
   "aim-neck": { name: "AIM NECK", price: 350000 },
-  "3105-lock": { name: "AIMLOCK VIP", price: 350000, type:"FFTH", category:"AIM 3105" },
+  "3105-lock": { name: "AIMLOCK VIP", price: 250000, type:"FFTH", category:"AIM 3105" },
   "3105-neck": { name: "AIM NECK", price: 350000, type:"FFTH", category:"AIM 3105" },
-  "3105-body": { name: "AIM BODY 3105", price: 350000, type:"FFTH", category:"AIM 3105" },
+  "3105-body": { name: "AIM BODY 3105", price: 100000, type:"FFTH", category:"AIM 3105" },
   "3105-drag": { name: "AIM DRAG", price: 350000, type:"FFTH", category:"AIM 3105" },
-  "3105-head": { name: "AIM HEAD", price: 350000, type:"FFTH", category:"AIM 3105" },
-  "3105-drag-vip-v1": { name: "DRAG VIP V1", price: 350000, type:"FFTH", category:"AIM 3105" },
+  "3105-head": { name: "AIM HEAD", price: 400000, type:"FFTH", category:"AIM 3105" },
+  "3105-drag-vip-v1": { name: "DRAG VIP V1", price: 400000, type:"FFTH", category:"AIM 3105" },
   "3105-drag-new": { name: "AIM DRAG NEW", price: 350000, type:"FFTH", category:"AIM 3105" },
   "3105-neck-new": { name: "AIM NECK NEW", price: 350000, type:"FFTH", category:"AIM 3105" },
-  "3105-magic": { name: "AIM MAGIC", price: 350000, type:"FFTH", category:"AIM 3105" },
-  "3105-supper": { name: "AIMLOCK SUPPER — FFTH", price: 500000, type:"FFTH", category:"AIM 3105" },
+  "3105-magic": { name: "AIM MAGIC", price: 150000, type:"FFTH", category:"AIM 3105" },
   "adr-aimlock": { name: "AIMLOCK", price: 350000, category:"AIM-ADR" },
   "blind-bag": { name: "TÚI MÙ", price: 50000, category:"TÚI MÙ" }
 };
@@ -171,31 +170,27 @@ function fileFor(order) {
   // download endpoint after the order is marked paid by Admin.
   if (order?.product === "aim-lock") {
     return order.edition === "ffth"
-      ? "AIMLOCK VIP FFTH.zip"
+      ? "private_files/AIM FLIZA/AIMLOCK VIP FFTH.zip"
       : order.edition === "ffm"
-        ? "AIMLOCK VIP FFM.zip"
+        ? "private_files/AIM FLIZA/AIMLOCK VIP FFM.zip"
         : null;
   }
   if (order?.product === "3105-lock") {
-    return "AIMLOCK VIP 3105.zip";
-  }
-  if (order?.product === "fliza-aimlock-supper") {
-    return order.edition === "ffth" ? "AIMLOCK SUPPER FFTH.zip" : order.edition === "ffm" ? "AIMLOCK SUPPER FFM.zip" : null;
+    return "private_files/AIM 3105-IOS/AIMLOCK VIP 3105.zip";
   }
   const files = {
-    "fliza-aimlock-supper": null,
-    "3105-supper": "AIM 3105/AIMLOCK SUPPER FFTH/AIMLOCK SUPPER 3105.zip",
-    "aim-drag": "AIMDRAG-Vanndaiixyz.zip",
-    "aim-body": "Aim Body 100% Antiban.zip",
-    "aim-neck": "AIM NECK NEW.zip",
-    "3105-neck": "AIM NECK NEW.zip",
-    "3105-body": "AIM BODY 100k (2).zip",
-    "3105-drag": "AIM DRAG NEW.zip",
-    "3105-head": "AIM HEAD.zip",
-    "3105-drag-vip-v1": "DRAG VIP V1.zip",
-    "3105-drag-new": "AIM DRAG NEW.zip",
-    "3105-neck-new": "AIM NECK NEW.zip",
-    "3105-magic": "AIM MAGIC.zip",
+    "fliza-aimlock-supper": "private_files/AIM FLIZA/AIMLOCK_SUPPER.zip",
+    "aim-drag": "private_files/AIMDRAG-Vanndaiixyz.zip",
+    "aim-body": "private_files/Aim Body 100% Antiban.zip",
+    "aim-neck": "private_files/AIM NECK NEW.zip",
+    "3105-neck": "private_files/AIM 3105-IOS/AIM NECK NEW.zip",
+    "3105-body": "private_files/AIM BODY 100k (2).zip",
+    "3105-drag": "private_files/AIM 3105-IOS/AIM DRAG NEW.zip",
+    "3105-head": "private_files/AIM 3105-IOS/AIM HEAD.zip",
+    "3105-drag-vip-v1": "private_files/AIM 3105-IOS/DRAG VIP V1.zip",
+    "3105-drag-new": "private_files/AIM 3105-IOS/AIM DRAG NEW.zip",
+    "3105-neck-new": "private_files/AIM 3105-IOS/AIM NECK NEW.zip",
+    "3105-magic": "private_files/AIM 3105-IOS/AIM MAGIC.zip",
     "adr-aimlock": "private_files/AIM-ADR/AIMLOCK VIP ADR.zip"
   };
   return files[order.product] || null;
@@ -211,7 +206,7 @@ function findProductFile(relativeFile) {
   }
   // Compatibility fallback for legacy filename-only mappings.
   const base = path.basename(relativeFile);
-  const legacyRoots = [__dirname, path.join(process.env.DATA_DIR || __dirname, "private_files")];
+  const legacyRoots = [path.join(__dirname, "private_files"), path.join(__dirname, "storage"), path.join(__dirname, "files")];
   const seen = new Set();
   function walk(dir, depth) {
     if (depth > 5 || seen.has(dir)) return null;
@@ -358,7 +353,7 @@ app.post("/api/orders", (req, res) => {
     const mappedFile = fileFor({ product, edition: edition || null });
     if (!mappedFile || !findProductFile(mappedFile)) return res.status(409).json({ error: "File sản phẩm hiện chưa có trên máy chủ." });
   }
-  if (["aim-lock", "fliza-aimlock-supper"].includes(product) && !["ffth", "ffm"].includes(edition)) {
+  if (product === "aim-lock" && !["ffth", "ffm"].includes(edition)) {
     return res.status(400).json({ error: "Vui lòng chọn FFTH hoặc FFM" });
   }
 
@@ -442,7 +437,7 @@ app.post("/admin/api/test-order", (req, res) => {
   if (!requireAdmin(req, res)) return;
   const { product, edition } = req.body || {};
   if (!products[product]) return res.status(400).json({ error: "Sản phẩm không hợp lệ" });
-  if (["aim-lock", "fliza-aimlock-supper"].includes(product) && !["ffth", "ffm"].includes(edition)) {
+  if (product === "aim-lock" && !["ffth", "ffm"].includes(edition)) {
     return res.status(400).json({ error: "Vui lòng chọn FFTH hoặc FFM" });
   }
   if (product !== "blind-bag" && product !== "adr-aimlock") {

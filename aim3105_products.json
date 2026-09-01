@@ -3,7 +3,7 @@
   "products": [
     {
       "name": "AIM HEAD",
-      "price": "350k",
+      "price": "400k",
       "desc": [
         "Kéo là đỏ",
         "Cân rank",
@@ -13,7 +13,7 @@
     },
     {
       "name": "DRAG VIP V1",
-      "price": "350k",
+      "price": "400k",
       "desc": [
         "Kéo là đỏ",
         "Cân rank",
@@ -43,21 +43,10 @@
     },
     {
       "name": "AIM MAGIC",
-      "price": "350k",
+      "price": "150k",
       "desc": [
         "bắn xung quanh người vẫn tính dame",
         "an toàn 100%"
-      ],
-      "install": "Vào sảnh → thoát ra → dán"
-    },
-    {
-      "name": "AIMLOCK SUPPER — FFTH",
-      "price": "500k",
-      "desc": [
-        "Cân Phòng",
-        "Cân Rank",
-        "An Toàn 100%",
-        "Kéo Nhẹ Là Đỏ"
       ],
       "install": "Vào sảnh → thoát ra → dán"
     }

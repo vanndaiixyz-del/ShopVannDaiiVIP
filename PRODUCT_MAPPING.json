@@ -3,7 +3,7 @@
     {
       "id": "aim-lock",
       "name": "AIMLOCK VIP",
-      "price_vnd": 350000,
+      "price_vnd": 250000,
       "variants": {
         "ffth": "private_files/AIM FLIZA/AIMLOCK VIP FFTH.zip",
         "ffm": "private_files/AIM FLIZA/AIMLOCK VIP FFM.zip"
@@ -12,12 +12,9 @@
     {
       "id": "fliza-aimlock-supper",
       "name": "AIMLOCK SUPPER",
-      "price_vnd": 500000,
-      "variant": "FFTH + FFM",
-      "variants": {
-        "ffth": "private_files/AIM FLIZA/AIMLOCK SUPPER FFTH.zip",
-        "ffm": "private_files/AIM FLIZA/AIMLOCK SUPPER FFM.zip"
-      }
+      "price_vnd": 250000,
+      "variant": "FFTH",
+      "file": "private_files/AIM FLIZA/AIMLOCK_SUPPER.zip"
     },
     {
       "id": "aim-drag",
@@ -28,7 +25,7 @@
     {
       "id": "aim-body",
       "name": "AIM BODY",
-      "price_vnd": 350000,
+      "price_vnd": 100000,
       "file": "private_files/Aim Body 100% Antiban.zip"
     },
     {
@@ -42,7 +39,7 @@
     {
       "id": "3105-lock",
       "name": "AIMLOCK VIP",
-      "price_vnd": 350000,
+      "price_vnd": 250000,
       "variant": "FFTH",
       "file": "private_files/AIM 3105-IOS/AIMLOCK VIP 3105.zip"
     },
@@ -56,7 +53,7 @@
     {
       "id": "3105-body",
       "name": "AIM BODY 3105",
-      "price_vnd": 350000,
+      "price_vnd": 100000,
       "variant": "FFTH",
       "file": "private_files/AIM BODY 100k (2).zip"
     },
@@ -70,14 +67,14 @@
     {
       "id": "3105-head",
       "name": "AIM HEAD",
-      "price_vnd": 350000,
+      "price_vnd": 400000,
       "variant": "FFTH",
       "file": "private_files/AIM 3105-IOS/AIM HEAD.zip"
     },
     {
       "id": "3105-drag-vip-v1",
       "name": "DRAG VIP V1",
-      "price_vnd": 350000,
+      "price_vnd": 400000,
       "variant": "FFTH",
       "file": "private_files/AIM 3105-IOS/DRAG VIP V1.zip"
     },
@@ -98,16 +95,9 @@
     {
       "id": "3105-magic",
       "name": "AIM MAGIC",
-      "price_vnd": 350000,
+      "price_vnd": 150000,
       "variant": "FFTH",
       "file": "private_files/AIM 3105-IOS/AIM MAGIC.zip"
-    },
-    {
-      "id": "3105-supper",
-      "name": "AIMLOCK SUPPER — FFTH",
-      "price_vnd": 500000,
-      "variant": "FFTH",
-      "file": "AIM 3105/AIMLOCK SUPPER FFTH/AIMLOCK SUPPER 3105.zip"
     }
   ],
   "AIM_ADR": [

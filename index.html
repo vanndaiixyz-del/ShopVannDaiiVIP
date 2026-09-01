@@ -77,24 +77,25 @@ const money=n=>new Intl.NumberFormat("vi-VN").format(n)+"đ";
 let visits=Number(localStorage.getItem("vdvip_visits")||"0")+1;localStorage.setItem("vdvip_visits",String(visits));document.getElementById("visitorCount").textContent=visits;
 const categories=[
  {title:"AIM 3105",badge:"TOP SẢN PHẨM",badgeClass:"gold",theme:"purple",products:[
-  ["3105-lock","AIMLOCK VIP",250000,false,"FFTH","• Cân Phòng<br>• Ko nên đi Rank<br>• Kéo Nhẹ Là Đỏ"],
+  ["3105-lock","AIMLOCK VIP",350000,false,"FFTH","• Cân Phòng<br>• Ko nên đi Rank<br>• Kéo Nhẹ Là Đỏ"],
+  ["3105-supper","AIMLOCK SUPPER — FFTH",500000,false,"FFTH","• Cân Phòng<br>• Cân Rank<br>• An Toàn 100%<br>• Kéo Nhẹ Là Đỏ"],
   ["3105-neck","AIM NECK",350000,false,"FFTH","• Cân Phòng<br>• Cân Rank<br>• Kéo nhẹ Là đỏ"],
-  ["3105-body","AIM BODY",100000,false,"FFTH","• Cân phòng<br>• Ko nên đi Rank<br>• Bắn Đâu Cũng Đỏ"],
+  ["3105-body","AIM BODY",350000,false,"FFTH","• Cân phòng<br>• Ko nên đi Rank<br>• Bắn Đâu Cũng Đỏ"],
   ["3105-drag","AIM DRAG",350000,false,"FFTH","• Cân Phòng<br>• Cân Rank<br>• Kéo Là đỏ"],
-  ["3105-head","AIM HEAD",400000,false,"FFTH","• Kéo là đỏ<br>• Cân rank<br>• Cân phòng"],
-  ["3105-drag-vip-v1","DRAG VIP V1",400000,false,"FFTH","• Kéo là đỏ<br>• Cân rank<br>• Cân phòng"],
+  ["3105-head","AIM HEAD",350000,false,"FFTH","• Kéo là đỏ<br>• Cân rank<br>• Cân phòng"],
+  ["3105-drag-vip-v1","DRAG VIP V1",350000,false,"FFTH","• Kéo là đỏ<br>• Cân rank<br>• Cân phòng"],
   ["3105-drag-new","AIM DRAG NEW",350000,false,"FFTH","• kéo là đỏ<br>• cân Rank<br>• cân phòng"],
   ["3105-neck-new","AIM NECK NEW",350000,false,"FFTH","• Kéo là đỏ<br>• Cân rank<br>• Cân phòng"],
-  ["3105-magic","AIM MAGIC",150000,false,"FFTH","• bắn xung quanh người vẫn tính dame<br>• an toàn 100%"],
+  ["3105-magic","AIM MAGIC",350000,false,"FFTH","• bắn xung quanh người vẫn tính dame<br>• an toàn 100%"],
  ]},
  {title:"AIM-ADR",badge:"MỚI",badgeClass:"gold",theme:"purple",products:[
   ["adr-aimlock","AIMLOCK",350000,false,"","• Cân rank<br>• Cân phòng<br>• kéo nhẹ là đỏ<br>• Ko kéo là vàng"]
  ]},
  {title:"AIM FLIZA",badge:"ỔN ĐỊNH - GỌN GÀNG",badgeClass:"blue",theme:"blue",products:[
-  ["aim-lock","AIMLOCK VIP",250000,true,"","• Cân Phòng<br>• Ko nên đi Rank<br>• Kéo Nhẹ Là Đỏ",[["ffth","FFTH"],["ffm","FFM"]]],
-  ["fliza-aimlock-supper","AIMLOCK SUPPER",250000,false,"FFTH","• Kéo là Đỏ<br>• Cân phòng<br>• Ko nên đi rank"],
+  ["aim-lock","AIMLOCK VIP",350000,true,"","• Cân Phòng<br>• Ko nên đi Rank<br>• Kéo Nhẹ Là Đỏ",[["ffth","FFTH"],["ffm","FFM"]]],
+  ["fliza-aimlock-supper","AIMLOCK SUPPER",500000,false,"FFTH + FFM","• Kéo là Đỏ<br>• Cân phòng<br>• Ko nên đi rank"],
   ["aim-drag","AIM DRAG",350000,false,"","• Cân Phòng<br>• Cân Rank<br>• Kéo Là đỏ"],
-  ["aim-body","AIM BODY",100000,false,"","• Cân phòng<br>• Ko nên đi Rank<br>• Bắn Đâu Cũng Đỏ"],
+  ["aim-body","AIM BODY",350000,false,"","• Cân phòng<br>• Ko nên đi Rank<br>• Bắn Đâu Cũng Đỏ"],
   ["aim-neck","AIM NECK",350000,false,"","• Cân Phòng<br>• Cân Rank<br>• Kéo nhẹ Là đỏ"]
  ]}
 ];

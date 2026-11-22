@@ -114,6 +114,7 @@ const blindBagFiles = ["aimbot head ff normal(1).zip", "Aim Body 100% Antiban.zi
 
 const products = {
   "reg-lock-ver-2": { name: "REG LOCK VER 2", price: 500000, category: "AIM FLIZA", type: "Chọn FFTH hoặc FFM" },
+  "reg-lock-super": { name: "REG LOCK SUPER", price: 99000, category: "AIM FLIZA", type: "FFTH" },
   "3105-aimlock": { name: "AIMLOCK", price: 500000, category: "AIM 3105", type: "MediaFire" },
   "3105-nhe-tam": { name: "Nhẹ Tâm", price: 200000, category: "AIM 3105", type: "Chọn FFTH hoặc FFM" },
   "3105-aim-drag": { name: "AIM DRAG", price: 350000, category: "AIM 3105", type: "Chọn FFTH hoặc FFM" },
@@ -157,6 +158,7 @@ function requireAdmin(req, res) {
 function fileFor(order) {
   const files = {
     "reg-lock-ver-2": { ffth: "private_files/AIM FLIZA/REG LOCK VER 2 FFTH.zip", ffm: "private_files/AIM FLIZA/REG LOCK VER 2 FFM.zip" },
+    "reg-lock-super": "private_files/AIM FLIZA/REG LOCK SUPER FFTH.zip",
     "3105-aimlock": "https://www.mediafire.com/file/7tztj2ttxaop4tp/AIMLOCK+500k.3105/file",
     "3105-nhe-tam": { ffth: "private_files/AIM 3105/Nhẹ Tâm FFTH.3105", ffm: "private_files/AIM 3105/Nhẹ Tâm FFM.3105" },
     "3105-aim-drag": { ffth: "private_files/AIM 3105/Drag FFTH.3105", ffm: "private_files/AIM 3105/Drag FFM.3105" },

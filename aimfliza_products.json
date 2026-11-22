@@ -1,0 +1,19 @@
+{
+  "category": "AIM FLIZA",
+  "products": [
+    {
+      "id": "reg-lock-ver-2",
+      "name": "REG LOCK VER 2",
+      "price_vnd": 500000,
+      "description": [
+        "Hỗ trợ iOS (15–27)",
+        "Kéo nhẹ là đỏ",
+        "Đi Rank, đi Phòng tốt"
+      ],
+      "variants": {
+        "ffth": "private_files/AIM FLIZA/REG LOCK VER 2 FFTH.zip",
+        "ffm": "private_files/AIM FLIZA/REG LOCK VER 2 FFM.zip"
+      }
+    }
+  ]
+}

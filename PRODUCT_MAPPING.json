@@ -1,116 +1,75 @@
 {
   "AIM_FLIZA": [
     {
-      "id": "aim-lock",
-      "name": "AIMLOCK VIP",
-      "price_vnd": 250000,
+      "id": "reg-lock-ver-2",
+      "name": "REG LOCK VER 2",
+      "price_vnd": 500000,
+      "description": [
+        "Hỗ trợ iOS (15–27)",
+        "Kéo nhẹ là đỏ",
+        "Đi Rank, đi Phòng tốt"
+      ],
       "variants": {
-        "ffth": "private_files/AIM FLIZA/AIMLOCK VIP FFTH.zip",
-        "ffm": "private_files/AIM FLIZA/AIMLOCK VIP FFM.zip"
+        "ffth": "private_files/AIM FLIZA/REG LOCK VER 2 FFTH.zip",
+        "ffm": "private_files/AIM FLIZA/REG LOCK VER 2 FFM.zip"
       }
-    },
-    {
-      "id": "fliza-aimlock-supper",
-      "name": "AIMLOCK SUPPER",
-      "price_vnd": 250000,
-      "variant": "FFTH",
-      "file": "private_files/AIM FLIZA/AIMLOCK_SUPPER.zip"
-    },
-    {
-      "id": "aim-drag",
-      "name": "AIM DRAG",
-      "price_vnd": 350000,
-      "file": "private_files/AIMDRAG-Vanndaiixyz.zip"
-    },
-    {
-      "id": "aim-body",
-      "name": "AIM BODY",
-      "price_vnd": 100000,
-      "file": "private_files/Aim Body 100% Antiban.zip"
-    },
-    {
-      "id": "aim-neck",
-      "name": "AIM NECK",
-      "price_vnd": 350000,
-      "file": "private_files/AIM NECK NEW.zip"
     }
   ],
   "AIM_3105": [
     {
-      "id": "3105-lock",
-      "name": "AIMLOCK VIP",
-      "price_vnd": 250000,
-      "variant": "FFTH",
-      "file": "private_files/AIM 3105-IOS/AIMLOCK VIP 3105.zip"
+      "id": "3105-aimlock",
+      "name": "AIMLOCK",
+      "price_vnd": 500000,
+      "description": [
+        "Hỗ trợ iOS (16–26.6.2)",
+        "Không hỗ trợ iOS (18.7.2–18.7.10)",
+        "Kéo nhẹ là đỏ",
+        "Đi Rank, đi Phòng tốt"
+      ],
+      "external_url": "https://www.mediafire.com/file/7tztj2ttxaop4tp/AIMLOCK+500k.3105/file"
     },
     {
-      "id": "3105-neck",
-      "name": "AIM NECK",
-      "price_vnd": 350000,
-      "variant": "FFTH",
-      "file": "private_files/AIM 3105-IOS/AIM NECK NEW.zip"
+      "id": "3105-nhe-tam",
+      "name": "Nhẹ Tâm",
+      "price_vnd": 200000,
+      "description": [
+        "Hỗ trợ iOS (17–26.6.2)",
+        "Không hỗ trợ iOS (18.7.2–18.7.10)",
+        "Kéo nhẹ là đỏ",
+        "Đi Rank, đi Phòng tốt"
+      ],
+      "variants": {
+        "ffth": "private_files/AIM 3105/Nhẹ Tâm FFTH.3105",
+        "ffm": "private_files/AIM 3105/Nhẹ Tâm FFM.3105"
+      }
     },
     {
-      "id": "3105-body",
-      "name": "AIM BODY 3105",
-      "price_vnd": 100000,
-      "variant": "FFTH",
-      "file": "private_files/AIM BODY 100k (2).zip"
-    },
-    {
-      "id": "3105-drag",
+      "id": "3105-aim-drag",
       "name": "AIM DRAG",
       "price_vnd": 350000,
-      "variant": "FFTH",
-      "file": "private_files/AIM 3105-IOS/AIM DRAG NEW.zip"
+      "description": [
+        "Hỗ trợ iOS (17–26.6.2)",
+        "Không hỗ trợ iOS (18.7.2–18.7.10)",
+        "Kéo nhẹ là đỏ",
+        "Đi Rank, đi Phòng tốt"
+      ],
+      "variants": {
+        "ffth": "private_files/AIM 3105/Drag FFTH.3105",
+        "ffm": "private_files/AIM 3105/Drag FFM.3105"
+      }
     },
     {
-      "id": "3105-head",
-      "name": "AIM HEAD",
-      "price_vnd": 400000,
-      "variant": "FFTH",
-      "file": "private_files/AIM 3105-IOS/AIM HEAD.zip"
-    },
-    {
-      "id": "3105-drag-vip-v1",
-      "name": "DRAG VIP V1",
-      "price_vnd": 400000,
-      "variant": "FFTH",
-      "file": "private_files/AIM 3105-IOS/DRAG VIP V1.zip"
-    },
-    {
-      "id": "3105-drag-new",
-      "name": "AIM DRAG NEW",
+      "id": "3105-aim-drag-v2",
+      "name": "AIM DRAG V2",
       "price_vnd": 350000,
-      "variant": "FFTH",
-      "file": "private_files/AIM 3105-IOS/AIM DRAG NEW.zip"
-    },
-    {
-      "id": "3105-neck-new",
-      "name": "AIM NECK NEW",
-      "price_vnd": 350000,
-      "variant": "FFTH",
-      "file": "private_files/AIM 3105-IOS/AIM NECK NEW.zip"
-    },
-    {
-      "id": "3105-magic",
-      "name": "AIM MAGIC",
-      "price_vnd": 150000,
-      "variant": "FFTH",
-      "file": "private_files/AIM 3105-IOS/AIM MAGIC.zip"
+      "description": [
+        "Chỉ FFTH",
+        "Hỗ trợ iOS (16–26.6.2)",
+        "Không hỗ trợ iOS (18.7.2–18.7.10)",
+        "Kéo nhẹ là đỏ",
+        "Đi Rank, đi Phòng tốt"
+      ],
+      "file": "private_files/AIM 3105/Aim_Drag_V2.3105"
     }
-  ],
-  "AIM_ADR": [
-    {
-      "id": "adr-aimlock",
-      "name": "AIMLOCK",
-      "price_vnd": 350000,
-      "file": "private_files/AIM-ADR/AIMLOCK VIP ADR.zip"
-    }
-  ],
-  "TUI_MU": {
-    "id": "blind-bag",
-    "name": "TÚI MÙ",
-    "price_vnd": 50000
-  }
+  ]
 }

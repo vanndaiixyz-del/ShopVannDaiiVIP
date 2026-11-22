@@ -90,6 +90,14 @@ body{background:radial-gradient(ellipse at 50% -15%,rgba(124,58,237,.25),transpa
 <section class="payment-flow"><div class="flow"><div class="flow-title">PHƯƠNG THỨC THANH TOÁN</div><div class="steps"><div class="step"><span class="ico">1</span><span>Tạo đơn</span></div><div class="step"><span class="ico">2</span><span>Quét QR</span></div><div class="step"><span class="ico">3</span><span>Admin xác nhận</span></div><div class="step"><span class="ico">4</span><span>Nhận quyền tải</span></div></div></div></section>
 
 <main class="shop">
+  <section class="category app-store-category" id="app-store" style="margin-top:18px">
+    <div class="cat-head"><h3>APP STORE</h3><span class="badge purple">ỨNG DỤNG MIỄN PHÍ</span></div>
+    <div class="product-grid">
+      <article class="card"><div class="product-top"><div class="icon">📱</div><div><h4>APP HỖ TRỢ ALL IOS</h4><div class="price" style="color:#86efac">FREE</div></div></div><p>Ứng dụng tải miễn phí, không cần mua.</p><div class="actions"><a class="buy" href="/app-store/3105-v2.2-beta-2.ipa" download style="display:block;text-align:center;text-decoration:none">⬇ TẢI NGAY</a></div></article>
+      <article class="card"><div class="product-top"><div class="icon">✨</div><div><h4>APP Độc Quyền</h4><div class="price" style="color:#86efac">FREE</div></div></div><p>Hỗ trợ iOS 16–26.6.2</p><div class="actions"><a class="buy" href="https://www.mediafire.com/file/1zr7lzpi0ru5101/ShopVann%25C4%2590aiiVIP%25282%2529.zip/file" target="_blank" rel="noopener noreferrer" style="display:block;text-align:center;text-decoration:none">⬇ TẢI NGAY</a></div></article>
+      <article class="card"><div class="product-top"><div class="icon">🧩</div><div><h4>APP FLIZA</h4><div class="price" style="color:#86efac">FREE</div></div></div><p>Hỗ trợ iOS 15–26.6.2</p><div class="actions"><a class="buy" href="https://www.mediafire.com/file/af7l4mrldobszbr/ShopVannĐaiiVIP_Fliza.zip/file" target="_blank" rel="noopener noreferrer" style="display:block;text-align:center;text-decoration:none">⬇ TẢI NGAY</a></div></article>
+    </div>
+  </section>
   <div id="products"></div>
 <section id="pay"><h2>Thanh toán</h2><p>Mã đơn hàng:</p><div class="order-code" id="orderCode">—</div><div class="amount" id="orderAmount">—</div><p id="info">Quét mã QR bên dưới và chuyển đúng số tiền.</p><div id="status"></div><div class="qr-payment"><h3>Thanh toán chuyển khoản</h3><p>Quét mã QR để chuyển đúng số tiền của đơn hàng.</p><img src="/payment-qr.png" alt="QR thanh toán" class="payment-qr"><p class="qr-note">Ghi mã đơn hàng vào nội dung chuyển khoản để Admin đối chiếu.</p></div><a id="download" class="download" href="#">Tải sản phẩm</a><button id="check" type="button" style="display:inline-block;margin-top:12px;padding:12px 18px;background:#1b2432;color:#fff;border:1px solid #344054;border-radius:10px;font-weight:900" onclick="checkOrder()">Kiểm tra thanh toán</button></section>
 
@@ -120,8 +128,7 @@ const categories=[
   ["3105-aim-drag-v2","AIM DRAG V2",350000,false,"FFTH","• Chỉ FFTH<br>• Hỗ trợ iOS (16–26.6.2)<br>• Không hỗ trợ iOS (18.7.2–18.7.10)<br>• Kéo nhẹ là đỏ<br>• Đi Rank, đi Phòng tốt"]
  ]},
  {title:"AIM FLIZA",badge:"SẢN PHẨM FLIZA",badgeClass:"blue",theme:"blue",products:[
-  ["reg-lock-ver-2","REG LOCK VER 2",500000,true,"","• Hỗ trợ iOS (15–27)<br>• Kéo nhẹ là đỏ<br>• Đi Rank, đi Phòng tốt",[["ffth","FFTH"],["ffm","FFM"]]],
-  ["reg-lock-super","REG LOCK SUPER",99000,false,"FFTH","• Hỗ trợ iOS (15–26.6.2)<br>• Không hỗ trợ iOS (18.7.2–18.7.10)<br>• Kéo nhẹ là đỏ<br>• AntiBan 100% (theo mô tả sản phẩm)"]
+  ["reg-lock-ver-2","REG LOCK VER 2",500000,true,"","• Hỗ trợ iOS (15–27)<br>• Kéo nhẹ là đỏ<br>• Đi Rank, đi Phòng tốt",[["ffth","FFTH"],["ffm","FFM"]]]
  ]}
 ];
 const box=document.getElementById("products");
@@ -130,7 +137,7 @@ function details(id){
   const is3105=id.startsWith("3105-");
   const text=is3105
       ? `CÁCH CÀI AIM 3105\n\nVÀO 40% THOÁT RA ÁP DỤNG, VÀO ĐẾN SẢNH THOÁT RA KHÔI PHỤC`
-      : `CÁCH CÀI AIM FLIZA\n\nVào Game → Đến 40% → Thoát ra → Dán → Vào đến Sảnh → Thoát ra → Dán avt Gốc`;
+      : `CÁCH CÀI AIM FLIZA\n\nHướng dẫn cài đặt sẽ được cập nhật cùng sản phẩm.`;
   alert(text);
 }
 render();

@@ -14,19 +14,6 @@
         "ffth": "private_files/AIM FLIZA/REG LOCK VER 2 FFTH.zip",
         "ffm": "private_files/AIM FLIZA/REG LOCK VER 2 FFM.zip"
       }
-    },
-    {
-      "id": "reg-lock-super",
-      "name": "REG LOCK SUPER",
-      "price_vnd": 99000,
-      "description": [
-        "FFTH",
-        "Hỗ trợ iOS (15–26.6.2)",
-        "Không hỗ trợ iOS (18.7.2–18.7.10)",
-        "Kéo nhẹ là đỏ",
-        "AntiBan 100% (theo mô tả sản phẩm)"
-      ],
-      "file": "private_files/AIM FLIZA/REG LOCK SUPER FFTH.zip"
     }
   ]
 }
